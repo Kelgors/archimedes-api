@@ -1,0 +1,48 @@
+datasource sqlite {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id String @id @default(uuid())
+  email String @unique
+  name String
+  encryptedPassword String
+  role Int @default(0)
+  links Link[]
+  lists List[]
+  tags Tag[]
+}
+
+model List {
+  id String @id @default(uuid())
+  name String
+  description String?
+  links Link[]
+  owner User @relation(fields: [ownerId], references: [id])
+  ownerId String
+}
+
+model Tag {
+  id String @id @default(uuid())
+  name String
+  links Link[]
+  owner User @relation(fields: [ownerId], references: [id])
+  ownerId String
+}
+
+model Link {
+  id String @id @default(uuid())
+  title String
+  description String?
+  url String
+  owner User @relation(fields: [ownerId], references: [id])
+  ownerId String
+  list List @relation(fields: [listId], references: [id])
+  listId String
+  tags Tag[]
+}

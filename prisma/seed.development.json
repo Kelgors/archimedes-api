@@ -1,0 +1,51 @@
+{
+  "users": [
+    {
+      "id": "83efc0cc-5655-40a7-b1de-f3a39f95c440",
+      "email": "admin@dev.me",
+      "name": "Admin Dev",
+      "encryptedPassword": "$argon2id$v=19$m=65536,t=3,p=4$xO2j7wT/+tFQlpAx9ZZEow$+FMP9BjaS+TpyYXma/kM4FshEgsJkPI4u/0G3fI1WPw",
+      "role": 1000
+    },
+    {
+      "id": "7b98f3e9-a1a4-4793-bd0c-941aade24003",
+      "email": "user@dev.me",
+      "name": "User Dev",
+      "encryptedPassword": "$argon2id$v=19$m=65536,t=3,p=4$xO2j7wT/+tFQlpAx9ZZEow$+FMP9BjaS+TpyYXma/kM4FshEgsJkPI4u/0G3fI1WPw",
+      "role": 100
+    }
+  ],
+  "lists": [
+    {
+      "id": "50258edb-9ad9-4b23-9214-1d9d109553cd",
+      "name": "Tech",
+      "description": "All tech packages, frameworks, techniques, ...",
+      "ownerId": "7b98f3e9-a1a4-4793-bd0c-941aade24003"
+    }
+  ],
+  "tags": [
+    {
+      "id": "80caa1b2-f930-42c0-bbc1-af803047053e",
+      "name": "nodejs",
+      "ownerId": "7b98f3e9-a1a4-4793-bd0c-941aade24003"
+    },
+    {
+      "id": "239e7be6-571b-49bc-b7f8-b2c98d224e18",
+      "name": "package",
+      "ownerId": "7b98f3e9-a1a4-4793-bd0c-941aade24003"
+    }
+  ],
+  "links": [
+    {
+      "id": "42782203-9ef6-40a0-8e6e-80496c96e554",
+      "title": "ExpressJS",
+      "description": "Fast, unopinionated, minimalist web framework for Node.js",
+      "url": "https://expressjs.com/",
+      "ownerId": "7b98f3e9-a1a4-4793-bd0c-941aade24003",
+      "listId": "50258edb-9ad9-4b23-9214-1d9d109553cd",
+      "tags": {
+        "connect": [{ "id": "80caa1b2-f930-42c0-bbc1-af803047053e" }, { "id": "239e7be6-571b-49bc-b7f8-b2c98d224e18" }]
+      }
+    }
+  ]
+}
