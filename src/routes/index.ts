@@ -2,8 +2,8 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import express, { NextFunction, Request, Response } from 'express';
 import { Request as JwtRequest, expressjwt } from 'express-jwt';
 import { ZodError } from 'zod';
-import { HttpException } from '../HttpException';
 import { JWT_SECRET } from '../config';
+import { HttpException } from '../libs/HttpException';
 import { privateRoute } from '../middlewares/private-route';
 import { prisma } from '../prisma';
 import authRoutes from './auth';
@@ -86,6 +86,8 @@ router.use(function (err: unknown, req: Request, res: Response, next: NextFuncti
       },
     })
     .end();
+
+  return next();
 });
 
 export default router;

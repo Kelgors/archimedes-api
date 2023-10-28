@@ -1,6 +1,6 @@
 import { Tag } from '@prisma/client';
 import express from 'express';
-import { HttpException } from '../HttpException';
+import { HttpException } from '../libs/HttpException';
 import { prisma } from '../prisma';
 
 const router = express.Router();
@@ -28,8 +28,7 @@ router.get('/:id', async function (req, res, next) {
     where: { ownerId: userId, id: req.params.id },
   });
   if (!dbTag) {
-    next(new HttpException(404, 'Not Found'));
-    return;
+    return next(new HttpException(404, 'Not Found'));
   }
   res
     .status(200)

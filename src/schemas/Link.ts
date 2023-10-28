@@ -18,7 +18,7 @@ export const LinkCreateInputParser = z.object({
 
 export const LinkUpdateInputParser = LinkCreateInputParser.partial();
 
-export const LinkParser = z.object({
+export const LinkSchema = z.object({
   id: LINK_ID,
   title: LINK_TITLE,
   description: LINK_DESCRIPTION,
@@ -27,4 +27,4 @@ export const LinkParser = z.object({
   listId: LIST_ID,
 });
 
-export type Link = z.infer<typeof LinkParser>;
+export type Link = z.infer<typeof LinkSchema>;

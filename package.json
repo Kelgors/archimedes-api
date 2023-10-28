@@ -7,9 +7,9 @@
     "start": "node dist/index.ts",
     "start:dev": "nodemon",
     "db:reset": "prisma db push --force-reset && prisma db seed",
-    "db:reset:dev": "export DATABASE_URL=file:./dev.db && export NODE_ENV=development && npm run db:reset",
-    "db:reset:test": "export DATABASE_URL=file:./test.db && export NODE_ENV=test && npm run db:reset",
-    "test": "npm run db:reset:test && jest"
+    "db:reset:dev": "dotenv -e .env.development -- npm run db:reset",
+    "db:reset:test": "dotenv -e .env.test -- npm run db:reset",
+    "test": "npm run db:reset:test && nyc jest"
   },
   "author": "",
   "license": "ISC",
@@ -21,6 +21,7 @@
     "@types/node": "^20.8.9",
     "@types/supertest": "^2.0.15",
     "nodemon": "^3.0.1",
+    "nyc": "^15.1.0",
     "prisma": "^5.5.2",
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.1",
@@ -31,6 +32,7 @@
     "@prisma/client": "^5.5.2",
     "argon2": "^0.31.1",
     "dotenv": "^16.3.1",
+    "dotenv-cli": "^7.3.0",
     "express": "^4.18.2",
     "express-jwt": "^8.4.1",
     "jsonwebtoken": "^9.0.2",

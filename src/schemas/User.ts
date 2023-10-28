@@ -13,9 +13,9 @@ export const UserCreateInputParser = z.object({
   password: USER_PLAIN_PASSWORD,
 });
 
-export const UserUpdateParser = UserCreateInputParser.partial();
+export const UserUpdateSchema = UserCreateInputParser.partial();
 
-export const UserParser = z.object({
+export const UserSchema = z.object({
   id: USER_ID,
   email: USER_EMAIL,
   name: USER_NAME,
@@ -28,4 +28,4 @@ export enum UserRole {
 }
 
 export type UserCreateInput = z.infer<typeof UserCreateInputParser>;
-export type User = z.infer<typeof UserParser>;
+export type User = z.infer<typeof UserSchema>;

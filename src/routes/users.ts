@@ -1,11 +1,11 @@
 import { User } from '@prisma/client';
 import express from 'express';
 import { omit } from 'lodash';
-import { HttpException } from '../HttpException';
+import { HttpException } from '../libs/HttpException';
 import { encryptPassword } from '../libs/password-encryption';
 import { minRole } from '../middlewares/min-role';
 import { prisma } from '../prisma';
-import { UserCreateInputParser, UserRole, UserUpdateParser } from '../schemas/User';
+import { UserCreateInputParser, UserRole, UserUpdateSchema } from '../schemas/User';
 
 const router = express.Router();
 
@@ -31,16 +31,14 @@ router.get('/', minRole(UserRole.ADMIN), async function (req, res) {
 router.get('/:id', async function (req, res, next) {
   // Check if asking for another user than the requesting one && is not admin
   if (req.params.id !== 'me' && (req.context.user?.role || 0) < UserRole.ADMIN) {
-    next(new HttpException(403, 'Forbidden', 'Not sufficient permissions'));
-    return;
+    return next(new HttpException(403, 'Forbidden', 'Not sufficient permissions'));
   }
   const id = req.params.id === 'me' ? req.context.user?.id || '' : req.params.id;
   const dbUser = await prisma.user.findUnique({
     where: { id },
   });
   if (!dbUser) {
-    next(new HttpException(404, 'Not Found'));
-    return;
+    return next(new HttpException(404, 'Not Found'));
   }
   res
     .status(200)
@@ -53,8 +51,7 @@ router.get('/:id', async function (req, res, next) {
 router.post('/', minRole(UserRole.ADMIN), async function (req, res, next) {
   const result = await UserCreateInputParser.safeParseAsync(req.body);
   if (!result.success) {
-    next(result.error);
-    return;
+    return next(result.error);
   }
   const body = result.data;
   try {
@@ -71,16 +68,14 @@ router.post('/', minRole(UserRole.ADMIN), async function (req, res, next) {
       .json({ data: renderUser(dbUser) })
       .end();
   } catch (err) {
-    next(err);
-    return;
+    return next(err);
   }
 });
 
 router.patch('/:id', minRole(UserRole.ADMIN), async function (req, res, next) {
-  const result = await UserUpdateParser.safeParseAsync(req.body);
+  const result = await UserUpdateSchema.safeParseAsync(req.body);
   if (!result.success) {
-    next(result.error);
-    return;
+    return next(result.error);
   }
   const body = result.data;
   try {
@@ -98,8 +93,7 @@ router.patch('/:id', minRole(UserRole.ADMIN), async function (req, res, next) {
       .json({ data: renderUser(dbUser) })
       .end();
   } catch (err) {
-    next(err);
-    return;
+    return next(err);
   }
 });
 
