@@ -8,7 +8,7 @@ const LINK_DESCRIPTION = z.string().optional();
 const LINK_URL = z.string();
 const OWNER_ID = USER_ID;
 
-export const LinkCreateInputParser = z.object({
+export const LinkCreateInputSchema = z.object({
   title: LINK_TITLE,
   description: LINK_DESCRIPTION,
   url: LINK_URL,
@@ -16,7 +16,7 @@ export const LinkCreateInputParser = z.object({
   listId: LIST_ID,
 });
 
-export const LinkUpdateInputParser = LinkCreateInputParser.partial();
+export const LinkUpdateInputSchema = LinkCreateInputSchema.partial();
 
 export const LinkSchema = z.object({
   id: LINK_ID,

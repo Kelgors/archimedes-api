@@ -5,7 +5,7 @@ import { HttpException } from '../libs/HttpException';
 import { encryptPassword } from '../libs/password-encryption';
 import { minRole } from '../middlewares/min-role';
 import { prisma } from '../prisma';
-import { UserCreateInputParser, UserRole, UserUpdateSchema } from '../schemas/User';
+import { UserCreateInputSchema, UserRole, UserUpdateSchema } from '../schemas/User';
 
 const router = express.Router();
 
@@ -49,7 +49,7 @@ router.get('/:id', async function (req, res, next) {
 });
 
 router.post('/', minRole(UserRole.ADMIN), async function (req, res, next) {
-  const result = await UserCreateInputParser.safeParseAsync(req.body);
+  const result = await UserCreateInputSchema.safeParseAsync(req.body);
   if (!result.success) {
     return next(result.error);
   }

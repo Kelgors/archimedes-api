@@ -6,14 +6,14 @@ const USER_NAME = z.string();
 export const USER_PLAIN_PASSWORD = z.string().min(12);
 const USER_ROLE = z.number().positive().int();
 
-export const UserCreateInputParser = z.object({
+export const UserCreateInputSchema = z.object({
   email: USER_EMAIL,
   name: USER_NAME,
   role: USER_ROLE,
   password: USER_PLAIN_PASSWORD,
 });
 
-export const UserUpdateSchema = UserCreateInputParser.partial();
+export const UserUpdateSchema = UserCreateInputSchema.partial();
 
 export const UserSchema = z.object({
   id: USER_ID,
@@ -27,5 +27,5 @@ export enum UserRole {
   ADMIN = 1000,
 }
 
-export type UserCreateInput = z.infer<typeof UserCreateInputParser>;
+export type UserCreateInput = z.infer<typeof UserCreateInputSchema>;
 export type User = z.infer<typeof UserSchema>;

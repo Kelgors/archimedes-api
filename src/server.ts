@@ -5,7 +5,7 @@ const app = express();
 
 app.use((req: Request, res, next) => {
   req.context = { user: null };
-  next();
+  return next();
 });
 app.use(express.json());
 app.use('/api', apiV1);
