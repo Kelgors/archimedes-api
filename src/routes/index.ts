@@ -1,3 +1,4 @@
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import express, { NextFunction, Request, Response } from 'express';
 import { Request as JwtRequest, expressjwt } from 'express-jwt';
 import { ZodError } from 'zod';
@@ -57,6 +58,23 @@ router.use(function (err: unknown, req: Request, res: Response, next: NextFuncti
       })
       .end();
     return;
+  }
+  if (err instanceof PrismaClientKnownRequestError) {
+    switch (err.code) {
+      case 'P2002':
+        res
+          .status(400)
+          .json({
+            error: {
+              code: 400,
+              message: 'Bad Request',
+              details: err,
+            },
+          })
+          .end();
+        return;
+      default:
+    }
   }
   res
     .status(500)

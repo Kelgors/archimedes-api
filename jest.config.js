@@ -3,4 +3,5 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   globalSetup: './scripts/jestGlobalSetup.ts',
+  verbose: true,
 };

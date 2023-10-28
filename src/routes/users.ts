@@ -50,17 +50,30 @@ router.get('/:id', async function (req, res, next) {
     .end();
 });
 
-router.post('/', async function (req, res) {
-  const body = await UserCreateInputParser.parseAsync(req.body);
-  const dbUser = await prisma.user.create({
-    data: {
-      email: body.email,
-      name: body.name,
-      role: body.role,
-      encryptedPassword: await encryptPassword(body.password),
-    },
-  });
-  res.status(201).json(renderUser(dbUser)).end();
+router.post('/', async function (req, res, next) {
+  const result = await UserCreateInputParser.safeParseAsync(req.body);
+  if (!result.success) {
+    next(result.error);
+    return;
+  }
+  const body = result.data;
+  try {
+    const dbUser = await prisma.user.create({
+      data: {
+        email: body.email,
+        name: body.name,
+        role: body.role,
+        encryptedPassword: await encryptPassword(body.password),
+      },
+    });
+    res
+      .status(201)
+      .json({ data: renderUser(dbUser) })
+      .end();
+  } catch (err) {
+    next(err);
+    return;
+  }
 });
 
 export default router;
