@@ -2,9 +2,9 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import { HttpException } from '../HttpException';
 import { JWT_SECRET } from '../config';
+import { verifyPassword } from '../libs/password-encryption';
 import { prisma } from '../prisma';
 import { AuthSigninParser } from '../schemas/Auth';
-import { verifyPassword } from '../services/password-encryption';
 
 const router = express.Router();
 
