@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { User } from '../schemas/User';
+import { User, UserRole } from '../schemas/User';
 import app from '../server';
 
 let ADMIN_TOKEN = '';
@@ -91,7 +91,7 @@ describe('GET /api/users/:id', () => {
     expectUser(response.body, {
       email: 'admin@test.me',
       name: 'Admin Test',
-      role: 1000,
+      role: UserRole.ADMIN,
     });
   });
 
@@ -114,7 +114,7 @@ describe('GET /api/users/:id', () => {
     expectUser(response.body, {
       email: 'user@test.me',
       name: 'User Test',
-      role: 100,
+      role: UserRole.USER,
     });
   });
 
@@ -129,7 +129,7 @@ describe('GET /api/users/:id', () => {
     expectUser(response.body, {
       email: 'admin@test.me',
       name: 'Admin Test',
-      role: 1000,
+      role: UserRole.ADMIN,
     });
   });
 });
@@ -137,9 +137,17 @@ describe('GET /api/users/:id', () => {
 describe('POST /api/users', () => {
   it('should be restrained to unauthorized users', async () => {
     const response = await request(app)
-      .get('/api/users/83efc0cc-5655-40a7-b1de-f3a39f95c440')
+      .post('/api/users')
+      .send({
+        email: 'not-authorized@test.test',
+        name: 'Not-Authorized Test',
+        role: UserRole.ADMIN,
+        password: 'changemeplease3',
+      })
+      .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${USER_TOKEN}`);
+    console.dir(response.body);
     expectError(response, 403);
   });
 
@@ -149,7 +157,7 @@ describe('POST /api/users', () => {
       .send({
         name: 'NoEmail Test',
         password: 'changemeplease2',
-        role: 100,
+        role: UserRole.USER,
       })
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
@@ -164,7 +172,7 @@ describe('POST /api/users', () => {
         email: 'incorrect-email@',
         name: 'IncorrectEmail Test',
         password: 'changemeplease2',
-        role: 100,
+        role: UserRole.USER,
       })
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
@@ -179,7 +187,7 @@ describe('POST /api/users', () => {
         email: 'user@test.me',
         name: 'User Test',
         password: 'changemeplease2',
-        role: 1000,
+        role: UserRole.ADMIN,
       })
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
@@ -193,7 +201,7 @@ describe('POST /api/users', () => {
       .send({
         email: 'no-name@test.test',
         password: 'changemeplease2',
-        role: 100,
+        role: UserRole.USER,
       })
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
@@ -207,7 +215,7 @@ describe('POST /api/users', () => {
       .send({
         email: 'no-password@test.test',
         name: 'NoPassword Test',
-        role: 100,
+        role: UserRole.USER,
       })
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
@@ -222,7 +230,7 @@ describe('POST /api/users', () => {
         email: 'no-password@test.test',
         name: 'NoPassword Test',
         password: '12345678901',
-        role: 100,
+        role: UserRole.USER,
       })
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
@@ -250,7 +258,7 @@ describe('POST /api/users', () => {
       .send({
         email: 'test@test.test',
         name: 'Test Test',
-        role: 100,
+        role: UserRole.USER,
         password: 'changemeplease2',
       })
       .set('Content-Type', 'application/json')
@@ -262,7 +270,7 @@ describe('POST /api/users', () => {
     expectUser(createResponse.body, {
       email: 'test@test.test',
       name: 'Test Test',
-      role: 100,
+      role: UserRole.USER,
     });
     // Test signin for the new user to test password persistance
     const authResponse = await request(app)

@@ -2,10 +2,10 @@ import { User } from '@prisma/client';
 import express from 'express';
 import { omit } from 'lodash';
 import { HttpException } from '../HttpException';
+import { encryptPassword } from '../libs/password-encryption';
 import { minRole } from '../middlewares/min-role';
 import { prisma } from '../prisma';
-import { UserCreateInputParser } from '../schemas/User';
-import { encryptPassword } from '../services/password-encryption';
+import { UserCreateInputParser, UserRole, UserUpdateParser } from '../schemas/User';
 
 const router = express.Router();
 
@@ -13,7 +13,7 @@ function renderUser(dbUser: User | null) {
   return omit(dbUser, ['encryptedPassword']);
 }
 
-router.get('/', minRole(1000), async function (req, res) {
+router.get('/', minRole(UserRole.ADMIN), async function (req, res) {
   const LIMIT = 20;
   const page = (Number(req.query.page) || 1) - 1;
   const dbUsers = await prisma.user.findMany({
@@ -30,7 +30,7 @@ router.get('/', minRole(1000), async function (req, res) {
 
 router.get('/:id', async function (req, res, next) {
   // Check if asking for another user than the requesting one && is not admin
-  if (req.params.id !== 'me' && (req.context.user?.role || 0) < 1000) {
+  if (req.params.id !== 'me' && (req.context.user?.role || 0) < UserRole.ADMIN) {
     next(new HttpException(403, 'Forbidden', 'Not sufficient permissions'));
     return;
   }
@@ -50,7 +50,7 @@ router.get('/:id', async function (req, res, next) {
     .end();
 });
 
-router.post('/', async function (req, res, next) {
+router.post('/', minRole(UserRole.ADMIN), async function (req, res, next) {
   const result = await UserCreateInputParser.safeParseAsync(req.body);
   if (!result.success) {
     next(result.error);
@@ -68,6 +68,33 @@ router.post('/', async function (req, res, next) {
     });
     res
       .status(201)
+      .json({ data: renderUser(dbUser) })
+      .end();
+  } catch (err) {
+    next(err);
+    return;
+  }
+});
+
+router.patch('/:id', minRole(UserRole.ADMIN), async function (req, res, next) {
+  const result = await UserUpdateParser.safeParseAsync(req.body);
+  if (!result.success) {
+    next(result.error);
+    return;
+  }
+  const body = result.data;
+  try {
+    const dbUser = await prisma.user.update({
+      where: { id: req.params.id },
+      data: {
+        email: body.email,
+        name: body.name,
+        role: body.role,
+        encryptedPassword: body.password ? await encryptPassword(body.password) : undefined,
+      },
+    });
+    res
+      .status(200)
       .json({ data: renderUser(dbUser) })
       .end();
   } catch (err) {

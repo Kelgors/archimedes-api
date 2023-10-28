@@ -22,5 +22,10 @@ export const UserParser = z.object({
   role: USER_ROLE,
 });
 
+export enum UserRole {
+  USER = 100,
+  ADMIN = 1000,
+}
+
 export type UserCreateInput = z.infer<typeof UserCreateInputParser>;
 export type User = z.infer<typeof UserParser>;
