@@ -32,6 +32,8 @@ beforeAll(async function () {
 });
 
 function expectUser(body: any, user: Partial<User>) {
+  expect(body).toHaveProperty('data');
+  expect(body.data).toBeDefined();
   if ('id' in user) {
     expect(body.data.id).toBe(user.id);
   } else {
@@ -47,7 +49,10 @@ function expectUser(body: any, user: Partial<User>) {
 function expectError(response: request.Response, status: number) {
   expect(response.headers['content-type']).toMatch(/json/);
   expect(response.status).toBe(status);
+  expect(response.body).toHaveProperty('error');
+  expect(response.body.error).toBeDefined();
   expect(response.body.error.code).toBe(status);
+  expect(typeof response.body.error.message).toBe('string');
 }
 
 describe('GET /api/users', () => {
@@ -147,7 +152,6 @@ describe('POST /api/users', () => {
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${USER_TOKEN}`);
-    console.dir(response.body);
     expectError(response, 403);
   });
 
@@ -298,5 +302,159 @@ describe('POST /api/users', () => {
       name: createResponse.body.data.name,
       role: createResponse.body.data.role,
     });
+  });
+});
+
+describe('PATCH /api/users', () => {
+  const USERS: User[] = [];
+  let index = 0;
+  beforeEach(function () {
+    const position = index++;
+    return request(app)
+      .post('/api/users')
+      .send({
+        email: `patching+${position}@test.test`,
+        name: `Patching(${position}) Test`,
+        role: UserRole.USER,
+        password: 'changemeplease',
+      })
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${ADMIN_TOKEN}`)
+      .then(function (response) {
+        USERS.push(response.body.data);
+      });
+  });
+
+  it('should be restrained to unauthorized users', async () => {
+    const localUser = USERS.pop();
+    expect(localUser).toBeDefined();
+    const response = await request(app)
+      .patch(`/api/users/${localUser?.id}`)
+      .send({
+        name: 'Not Authorized Test',
+      })
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${USER_TOKEN}`);
+    expectError(response, 403);
+  });
+
+  it('should update user name', async () => {
+    const localUser = USERS.pop();
+    expect(localUser).toBeDefined();
+    const response = await request(app)
+      .patch(`/api/users/${localUser?.id}`)
+      .send({
+        name: 'Patching Test 02',
+      })
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
+    expectUser(response.body, {
+      ...localUser,
+      name: 'Patching Test 02',
+    });
+  });
+
+  it('should not update user with incorrect email', async () => {
+    const localUser = USERS.pop();
+    expect(localUser).toBeDefined();
+    const response = await request(app)
+      .patch(`/api/users/${localUser?.id}`)
+      .send({
+        email: 'incorrect-email@',
+      })
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
+    expectError(response, 400);
+  });
+
+  it('should not update user with an already existing email', async () => {
+    const localUser = USERS.pop();
+    expect(localUser).toBeDefined();
+    const response = await request(app)
+      .patch(`/api/users/${localUser?.id}`)
+      .send({
+        email: 'admin@test.me',
+      })
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
+    expectError(response, 400);
+  });
+
+  it('should update user with the new email', async () => {
+    const localUser = USERS.pop();
+    expect(localUser).toBeDefined();
+    const response = await request(app)
+      .patch(`/api/users/${localUser?.id}`)
+      .send({
+        email: 'updated-email@test.me',
+      })
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
+    expectUser(response.body, {
+      ...localUser,
+      email: 'updated-email@test.me',
+    });
+  });
+
+  it('should update user without role', async () => {
+    const localUser = USERS.pop();
+    expect(localUser).toBeDefined();
+    const response = await request(app)
+      .patch(`/api/users/${localUser?.id}`)
+      .send({
+        role: UserRole.ADMIN,
+      })
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
+    expectUser(response.body, {
+      ...localUser,
+      role: UserRole.ADMIN,
+    });
+  });
+
+  it('should not update user with password.length < 12', async () => {
+    const localUser = USERS.pop();
+    expect(localUser).toBeDefined();
+    const response = await request(app)
+      .patch(`/api/users/${localUser?.id}`)
+      .send({
+        password: '12345678901',
+      })
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
+    expectError(response, 400);
+  });
+
+  it('should update user with the new password', async () => {
+    const localUser = USERS.pop();
+    expect(localUser).toBeDefined();
+    await request(app)
+      .patch(`/api/users/${localUser?.id}`)
+      .send({
+        password: 'jaimeleponey3$',
+      })
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
+
+    const authResponse = await request(app)
+      .post('/api/auth/sign')
+      .send({
+        email: localUser?.email,
+        password: 'jaimeleponey3$',
+      })
+      .set('Accept', 'application/json')
+      .set('Content-Type', 'application/json');
+    expect(authResponse.headers['content-type']).toMatch(/json/);
+    expect(authResponse.status).toBe(201);
+    expect(typeof authResponse.body.token).toBe('string');
   });
 });
