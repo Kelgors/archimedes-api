@@ -2,15 +2,15 @@
   "users": [
     {
       "id": "83efc0cc-5655-40a7-b1de-f3a39f95c440",
-      "email": "admin@test.me",
-      "name": "Admin Test",
+      "email": "admin@dev.me",
+      "name": "Admin Dev",
       "encryptedPassword": "$argon2id$v=19$m=65536,t=3,p=4$xO2j7wT/+tFQlpAx9ZZEow$+FMP9BjaS+TpyYXma/kM4FshEgsJkPI4u/0G3fI1WPw",
       "role": 1000
     },
     {
       "id": "7b98f3e9-a1a4-4793-bd0c-941aade24003",
-      "email": "user@test.me",
-      "name": "User Test",
+      "email": "user@dev.me",
+      "name": "User Dev",
       "encryptedPassword": "$argon2id$v=19$m=65536,t=3,p=4$xO2j7wT/+tFQlpAx9ZZEow$+FMP9BjaS+TpyYXma/kM4FshEgsJkPI4u/0G3fI1WPw",
       "role": 100
     }
@@ -58,45 +58,42 @@
       "id": "42782203-9ef6-40a0-8e6e-80496c96e554",
       "title": "ExpressJS",
       "description": "Fast, unopinionated, minimalist web framework for Node.js",
-      "url": "https://expressjs.com/"
+      "url": "https://expressjs.com/",
+      "lists": [
+        {
+          "id": "50258edb-9ad9-4b23-9214-1d9d109553cd"
+        }
+      ],
+      "tags": [
+        {
+          "id": "80caa1b2-f930-42c0-bbc1-af803047053e"
+        },
+        {
+          "id": "239e7be6-571b-49bc-b7f8-b2c98d224e18"
+        }
+      ]
     },
     {
       "id": "575b7595-bca3-4e9a-b672-2e7724a29334",
       "title": "Zod",
       "description": "TypeScript-first schema validation with static type inference",
-      "url": "https://zod.dev/"
-    }
-  ],
-  "bookmarkOnLists": [
-    {
-      "bookmarkId": "42782203-9ef6-40a0-8e6e-80496c96e554",
-      "listId": "50258edb-9ad9-4b23-9214-1d9d109553cd"
-    },
-    {
-      "bookmarkId": "575b7595-bca3-4e9a-b672-2e7724a29334",
-      "listId": "50258edb-9ad9-4b23-9214-1d9d109553cd"
-    }
-  ],
-  "tagOnBookmarks": [
-    {
-      "bookmarkId": "42782203-9ef6-40a0-8e6e-80496c96e554",
-      "tagId": "80caa1b2-f930-42c0-bbc1-af803047053e"
-    },
-    {
-      "bookmarkId": "42782203-9ef6-40a0-8e6e-80496c96e554",
-      "tagId": "239e7be6-571b-49bc-b7f8-b2c98d224e18"
-    },
-    {
-      "bookmarkId": "575b7595-bca3-4e9a-b672-2e7724a29334",
-      "tagId": "80caa1b2-f930-42c0-bbc1-af803047053e"
-    },
-    {
-      "bookmarkId": "575b7595-bca3-4e9a-b672-2e7724a29334",
-      "tagId": "239e7be6-571b-49bc-b7f8-b2c98d224e18"
-    },
-    {
-      "bookmarkId": "575b7595-bca3-4e9a-b672-2e7724a29334",
-      "tagId": "d860d634-052a-4ad5-af43-7335d45e73ba"
+      "url": "https://zod.dev/",
+      "lists": [
+        {
+          "id": "50258edb-9ad9-4b23-9214-1d9d109553cd"
+        }
+      ],
+      "tags": [
+        {
+          "id": "80caa1b2-f930-42c0-bbc1-af803047053e"
+        },
+        {
+          "id": "239e7be6-571b-49bc-b7f8-b2c98d224e18"
+        },
+        {
+          "id": "d860d634-052a-4ad5-af43-7335d45e73ba"
+        }
+      ]
     }
   ]
 }

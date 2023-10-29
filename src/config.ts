@@ -14,4 +14,5 @@ if (!APP_SECRET) {
   throw new Error('Missing APP_SECRET');
 }
 
-export const DATABASE_URL = process.env.DATABASE_URL || null;
+export const DB_NAME = process.env.DB_NAME || '';
+export const DB_SYNC = process.env.DB_SYNC === 'true';

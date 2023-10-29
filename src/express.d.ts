@@ -1,13 +1,9 @@
-import { User } from '@prisma/client';
-
-export type AppContext = {
-  user: User | null;
-};
+import { Token } from './schemas/Auth';
 
 declare global {
   namespace Express {
     export interface Request {
-      context: AppContext;
+      token: Token;
     }
   }
 }

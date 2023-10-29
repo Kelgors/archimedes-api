@@ -13,20 +13,14 @@ export const UserCreateInputSchema = z.object({
   password: USER_PLAIN_PASSWORD,
 });
 
-export const UserUpdateSchema = UserCreateInputSchema.partial();
+export const UserUpdateInputSchema = UserCreateInputSchema.partial();
 
-export const UserSchema = z.object({
+export const ApiUserSchema = z.object({
   id: USER_ID,
   email: USER_EMAIL,
   name: USER_NAME,
   role: USER_ROLE,
-  encryptedPassword: z.string(),
 });
 
-export enum UserRole {
-  USER = 100,
-  ADMIN = 1000,
-}
-
 export type UserCreateInput = z.infer<typeof UserCreateInputSchema>;
-export type User = z.infer<typeof UserSchema>;
+export type User = z.infer<typeof ApiUserSchema>;

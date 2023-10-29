@@ -1,11 +1,10 @@
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import express, { NextFunction, Request, Response } from 'express';
 import { Request as JwtRequest, expressjwt } from 'express-jwt';
+import { QueryFailedError } from 'typeorm';
 import { ZodError } from 'zod';
 import { JWT_SECRET } from '../config';
 import { HttpException } from '../libs/HttpException';
 import { privateRoute } from '../middlewares/private-route';
-import { prisma } from '../prisma';
 import authRoutes from './auth';
 import tagsRoutes from './tags';
 import usersRoutes from './users';
@@ -19,35 +18,33 @@ router.use(
     credentialsRequired: false,
   }),
   async function (req: JwtRequest, res, next) {
-    const userId = req.auth?.sub;
+    // FIX doublons auth/token in request
+    const token = req.auth;
+    if (!token) return next();
+    const userId = token.sub;
+    req.token = token as any;
     if (!userId) {
-      next();
-      return;
+      return next();
     }
-    req.context.user = await prisma.user.findUnique({
-      where: { id: req.auth?.sub },
-    });
-    next();
+    return next();
   },
 );
 
 router.use('/auth', authRoutes);
-
 router.use('/users', privateRoute, usersRoutes);
 router.use('/tags', privateRoute, tagsRoutes);
 
 router.use(function (err: unknown, req: Request, res: Response, next: NextFunction) {
   if (err instanceof HttpException) {
-    res
+    return res
       .status(err.code)
       .json({
         error: err,
       })
       .end();
-    return;
   }
   if (err instanceof ZodError) {
-    res
+    return res
       .status(400)
       .json({
         error: {
@@ -57,40 +54,20 @@ router.use(function (err: unknown, req: Request, res: Response, next: NextFuncti
         },
       })
       .end();
-    return;
   }
-  if (err instanceof PrismaClientKnownRequestError) {
-    switch (err.code) {
-      case 'P2002':
-        res
-          .status(400)
-          .json({
-            error: {
-              code: 400,
-              message: 'Bad Request',
-              details: err,
-            },
-          })
-          .end();
-        return;
-      case 'P2025':
-        if (err.meta?.cause === 'Record to delete does not exist.') {
-          res
-            .status(404)
-            .json({
-              error: {
-                code: 404,
-                message: 'Not Found',
-              },
-            })
-            .end();
-          return;
-        }
-        break;
-      default:
-    }
+  if (err instanceof QueryFailedError) {
+    return res
+      .status(500)
+      .json({
+        error: {
+          code: 500,
+          message: 'Internal error',
+          details: err,
+        },
+      })
+      .end();
   }
-  res
+  return res
     .status(500)
     .json({
       error: {
@@ -100,8 +77,6 @@ router.use(function (err: unknown, req: Request, res: Response, next: NextFuncti
       },
     })
     .end();
-
-  return next();
 });
 
 export default router;

@@ -1,13 +1,13 @@
-import express, { Request } from 'express';
+import express from 'express';
+import { AppDataSource } from './db';
 import apiV1 from './routes';
 
-const app = express();
+export async function createServer() {
+  await AppDataSource.initialize();
 
-app.use((req: Request, res, next) => {
-  req.context = { user: null };
-  return next();
-});
-app.use(express.json());
-app.use('/api', apiV1);
+  const app = express();
+  app.use(express.json());
+  app.use('/api', apiV1);
 
-export default app;
+  return app;
+}

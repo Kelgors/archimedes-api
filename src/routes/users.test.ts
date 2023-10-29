@@ -1,11 +1,15 @@
+import { Express } from 'express';
 import request from 'supertest';
-import { User, UserRole } from '../schemas/User';
-import app from '../server';
+import { UserRole } from '../models/User';
+import { User } from '../schemas/User';
+import { createServer } from '../server';
 
 describe('/api/users', function () {
+  let app: Express | undefined;
   let ADMIN_TOKEN = '';
   let USER_TOKEN = '';
   beforeAll(async function () {
+    app = await createServer();
     await Promise.all([
       request(app)
         .post('/api/auth/sign')
@@ -16,6 +20,8 @@ describe('/api/users', function () {
         .set('Accept', 'application/json')
         .set('Content-Type', 'application/json')
         .then(function (response) {
+          console.dir(response.body);
+          expect(response.body).toHaveProperty('token');
           ADMIN_TOKEN = response.body.token;
         }),
       request(app)
@@ -27,6 +33,7 @@ describe('/api/users', function () {
         .set('Accept', 'application/json')
         .set('Content-Type', 'application/json')
         .then(function (response) {
+          expect(response.body).toHaveProperty('token');
           USER_TOKEN = response.body.token;
         }),
     ]);
@@ -58,6 +65,7 @@ describe('/api/users', function () {
 
   describe('GET /api/users', () => {
     it('should be restrained to unauthorized users', async () => {
+      console.log('USER_TOKEN: ' + USER_TOKEN);
       const response = await request(app)
         .get('/api/users')
         .set('Accept', 'application/json')
@@ -324,6 +332,7 @@ describe('/api/users', function () {
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`)
         .then(function (response) {
           USERS.push(response.body.data);
+          console.log('dummy user: %o', response.body.data);
         });
     });
 

@@ -1,40 +1,36 @@
-import { User } from '@prisma/client';
 import express from 'express';
 import { omit } from 'lodash';
+import { getRepository } from '../db';
 import { HttpException } from '../libs/HttpException';
-import { encryptPassword } from '../libs/password-encryption';
 import { minRole } from '../middlewares/min-role';
-import { prisma } from '../prisma';
-import { UserCreateInputSchema, UserRole, UserUpdateSchema } from '../schemas/User';
+import { User, UserRole } from '../models/User';
+import { UserCreateInputSchema, UserUpdateInputSchema } from '../schemas/User';
+import { passwordEncryptionService } from '../services/PasswordEncryptionService';
 
 const router = express.Router();
-
-function renderUser(dbUser: User | null) {
-  return omit(dbUser, ['encryptedPassword']);
-}
 
 router.get('/', minRole(UserRole.ADMIN), async function (req, res) {
   const LIMIT = 20;
   const page = (Number(req.query.page) || 1) - 1;
-  const dbUsers = await prisma.user.findMany({
+  const dbUsers = await getRepository(User).find({
     skip: page * LIMIT,
     take: LIMIT,
   });
   return res
     .status(200)
     .json({
-      data: dbUsers.map(renderUser),
+      data: dbUsers,
     })
     .end();
 });
 
 router.get('/:id', async function (req, res, next) {
   // Check if asking for another user than the requesting one && is not admin
-  if (req.params.id !== 'me' && (req.context.user?.role || 0) < UserRole.ADMIN) {
+  if (req.params.id !== 'me' && (req.token?.role || 0) < UserRole.ADMIN) {
     return next(new HttpException(403, 'Forbidden', 'Not sufficient permissions'));
   }
-  const id = req.params.id === 'me' ? req.context.user?.id || '' : req.params.id;
-  const dbUser = await prisma.user.findUnique({
+  const id = req.params.id === 'me' ? req.token?.sub || '' : req.params.id;
+  const dbUser = await getRepository(User).findOne({
     where: { id },
   });
   if (!dbUser) {
@@ -43,7 +39,7 @@ router.get('/:id', async function (req, res, next) {
   return res
     .status(200)
     .json({
-      data: renderUser(dbUser),
+      data: dbUser,
     })
     .end();
 });
@@ -55,43 +51,34 @@ router.post('/', minRole(UserRole.ADMIN), async function (req, res, next) {
   }
   const body = result.data;
   try {
-    const dbUser = await prisma.user.create({
-      data: {
-        email: body.email,
-        name: body.name,
-        role: body.role,
-        encryptedPassword: await encryptPassword(body.password),
-      },
+    const dbUser = await getRepository(User).save({
+      email: body.email,
+      name: body.name,
+      role: body.role,
+      encryptedPassword: await passwordEncryptionService.encryptPassword(body.password),
     });
-    return res
-      .status(201)
-      .json({ data: renderUser(dbUser) })
-      .end();
+    return res.status(201).json({ data: dbUser }).end();
   } catch (err) {
     return next(err);
   }
 });
 
 router.patch('/:id', minRole(UserRole.ADMIN), async function (req, res, next) {
-  const result = await UserUpdateSchema.safeParseAsync(req.body);
+  const result = await UserUpdateInputSchema.safeParseAsync(req.body);
   if (!result.success) {
     return next(result.error);
   }
   const body = result.data;
   try {
-    const dbUser = await prisma.user.update({
+    const dbOriginalUser = await getRepository(User).findOneOrFail({
       where: { id: req.params.id },
-      data: {
-        email: body.email,
-        name: body.name,
-        role: body.role,
-        encryptedPassword: body.password ? await encryptPassword(body.password) : undefined,
-      },
     });
-    return res
-      .status(200)
-      .json({ data: renderUser(dbUser) })
-      .end();
+    const dbPayload = Object.assign({}, dbOriginalUser, omit(body, ['password']));
+    if (body.password) {
+      dbPayload.encryptedPassword = await passwordEncryptionService.encryptPassword(body.password);
+    }
+    const dbUser = await getRepository(User).save(dbPayload);
+    return res.status(200).json({ data: dbUser }).end();
   } catch (err) {
     return next(err);
   }
@@ -99,13 +86,13 @@ router.patch('/:id', minRole(UserRole.ADMIN), async function (req, res, next) {
 
 router.delete('/:id', minRole(UserRole.ADMIN), async function (req, res, next) {
   try {
-    const dbUser = await prisma.user.delete({
-      where: { id: req.params.id },
+    const deleteResult = await getRepository(User).delete({
+      id: req.params.id,
     });
-    return res
-      .status(200)
-      .json({ data: renderUser(dbUser) })
-      .end();
+    if ((deleteResult.affected || 0) === 0) {
+      throw new HttpException(404, 'Not found');
+    }
+    return res.status(200).json({}).end();
   } catch (err) {
     return next(err);
   }

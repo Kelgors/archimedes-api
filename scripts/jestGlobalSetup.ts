@@ -1,13 +1,14 @@
 import dotenv from 'dotenv';
 import request from 'supertest';
-import app from '../src/server';
+import { createServer } from '../src/server';
 
 export default async function () {
   dotenv.config({
     path: `.env.${process.env.NODE_ENV || 'development'}`,
   });
+  const app = await createServer();
 
-  const response = await request(app)
+  await request(app)
     .post('/api/auth/sign')
     .send({
       email: 'admin@test.me',
