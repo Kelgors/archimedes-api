@@ -73,6 +73,20 @@ router.use(function (err: unknown, req: Request, res: Response, next: NextFuncti
           })
           .end();
         return;
+      case 'P2025':
+        if (err.meta?.cause === 'Record to delete does not exist.') {
+          res
+            .status(404)
+            .json({
+              error: {
+                code: 404,
+                message: 'Not Found',
+              },
+            })
+            .end();
+          return;
+        }
+        break;
       default:
     }
   }

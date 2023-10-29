@@ -20,32 +20,83 @@
       "id": "50258edb-9ad9-4b23-9214-1d9d109553cd",
       "name": "Tech",
       "description": "All tech packages, frameworks, techniques, ...",
-      "ownerId": "7b98f3e9-a1a4-4793-bd0c-941aade24003"
+      "ownerId": "83efc0cc-5655-40a7-b1de-f3a39f95c440"
+    }
+  ],
+  "permissions": [
+    {
+      "listId": "50258edb-9ad9-4b23-9214-1d9d109553cd",
+      "userId": "83efc0cc-5655-40a7-b1de-f3a39f95c440",
+      "writable": true
+    },
+    {
+      "listId": "50258edb-9ad9-4b23-9214-1d9d109553cd",
+      "userId": "7b98f3e9-a1a4-4793-bd0c-941aade24003",
+      "writable": false
     }
   ],
   "tags": [
     {
       "id": "80caa1b2-f930-42c0-bbc1-af803047053e",
-      "name": "nodejs",
-      "ownerId": "7b98f3e9-a1a4-4793-bd0c-941aade24003"
+      "name": "nodejs"
     },
     {
       "id": "239e7be6-571b-49bc-b7f8-b2c98d224e18",
-      "name": "package",
-      "ownerId": "7b98f3e9-a1a4-4793-bd0c-941aade24003"
+      "name": "package"
+    },
+    {
+      "id": "d860d634-052a-4ad5-af43-7335d45e73ba",
+      "name": "typscript"
+    },
+    {
+      "id": "4fcf152b-7f8d-4124-ac92-9f8fd3f8288f",
+      "name": "cooking"
     }
   ],
-  "links": [
+  "bookmarks": [
     {
       "id": "42782203-9ef6-40a0-8e6e-80496c96e554",
       "title": "ExpressJS",
       "description": "Fast, unopinionated, minimalist web framework for Node.js",
-      "url": "https://expressjs.com/",
-      "ownerId": "7b98f3e9-a1a4-4793-bd0c-941aade24003",
-      "listId": "50258edb-9ad9-4b23-9214-1d9d109553cd",
-      "tags": {
-        "connect": [{ "id": "80caa1b2-f930-42c0-bbc1-af803047053e" }, { "id": "239e7be6-571b-49bc-b7f8-b2c98d224e18" }]
-      }
+      "url": "https://expressjs.com/"
+    },
+    {
+      "id": "575b7595-bca3-4e9a-b672-2e7724a29334",
+      "title": "Zod",
+      "description": "TypeScript-first schema validation with static type inference",
+      "url": "https://zod.dev/"
+    }
+  ],
+  "bookmarkOnLists": [
+    {
+      "bookmarkId": "42782203-9ef6-40a0-8e6e-80496c96e554",
+      "listId": "50258edb-9ad9-4b23-9214-1d9d109553cd"
+    },
+    {
+      "bookmarkId": "575b7595-bca3-4e9a-b672-2e7724a29334",
+      "listId": "50258edb-9ad9-4b23-9214-1d9d109553cd"
+    }
+  ],
+  "tagOnBookmarks": [
+    {
+      "bookmarkId": "42782203-9ef6-40a0-8e6e-80496c96e554",
+      "tagId": "80caa1b2-f930-42c0-bbc1-af803047053e"
+    },
+    {
+      "bookmarkId": "42782203-9ef6-40a0-8e6e-80496c96e554",
+      "tagId": "239e7be6-571b-49bc-b7f8-b2c98d224e18"
+    },
+    {
+      "bookmarkId": "575b7595-bca3-4e9a-b672-2e7724a29334",
+      "tagId": "80caa1b2-f930-42c0-bbc1-af803047053e"
+    },
+    {
+      "bookmarkId": "575b7595-bca3-4e9a-b672-2e7724a29334",
+      "tagId": "239e7be6-571b-49bc-b7f8-b2c98d224e18"
+    },
+    {
+      "bookmarkId": "575b7595-bca3-4e9a-b672-2e7724a29334",
+      "tagId": "d860d634-052a-4ad5-af43-7335d45e73ba"
     }
   ]
 }

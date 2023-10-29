@@ -20,6 +20,7 @@ export const UserSchema = z.object({
   email: USER_EMAIL,
   name: USER_NAME,
   role: USER_ROLE,
+  encryptedPassword: z.string(),
 });
 
 export enum UserRole {

@@ -20,7 +20,7 @@ router.get('/', minRole(UserRole.ADMIN), async function (req, res) {
     skip: page * LIMIT,
     take: LIMIT,
   });
-  res
+  return res
     .status(200)
     .json({
       data: dbUsers.map(renderUser),
@@ -40,7 +40,7 @@ router.get('/:id', async function (req, res, next) {
   if (!dbUser) {
     return next(new HttpException(404, 'Not Found'));
   }
-  res
+  return res
     .status(200)
     .json({
       data: renderUser(dbUser),
@@ -63,7 +63,7 @@ router.post('/', minRole(UserRole.ADMIN), async function (req, res, next) {
         encryptedPassword: await encryptPassword(body.password),
       },
     });
-    res
+    return res
       .status(201)
       .json({ data: renderUser(dbUser) })
       .end();
@@ -88,7 +88,21 @@ router.patch('/:id', minRole(UserRole.ADMIN), async function (req, res, next) {
         encryptedPassword: body.password ? await encryptPassword(body.password) : undefined,
       },
     });
-    res
+    return res
+      .status(200)
+      .json({ data: renderUser(dbUser) })
+      .end();
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.delete('/:id', minRole(UserRole.ADMIN), async function (req, res, next) {
+  try {
+    const dbUser = await prisma.user.delete({
+      where: { id: req.params.id },
+    });
+    return res
       .status(200)
       .json({ data: renderUser(dbUser) })
       .end();

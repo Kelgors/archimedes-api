@@ -12,7 +12,25 @@ function renderTag(tag: Tag) {
 router.get('/', async function (req, res) {
   const userId = req.context.user?.id || '';
   const dbTags = await prisma.tag.findMany({
-    where: { ownerId: userId },
+    where: {
+      bookmarks: {
+        some: {
+          bookmark: {
+            lists: {
+              some: {
+                list: {
+                  permissions: {
+                    some: {
+                      userId,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   });
   res
     .status(200)
@@ -25,7 +43,9 @@ router.get('/', async function (req, res) {
 router.get('/:id', async function (req, res, next) {
   const userId = req.context.user?.id || '';
   const dbTag = await prisma.tag.findUnique({
-    where: { ownerId: userId, id: req.params.id },
+    where: {
+      id: req.params.id,
+    },
   });
   if (!dbTag) {
     return next(new HttpException(404, 'Not Found'));
