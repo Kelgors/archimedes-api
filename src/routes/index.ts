@@ -1,9 +1,9 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { Request as JwtRequest, expressjwt } from 'express-jwt';
-import { QueryFailedError } from 'typeorm';
 import { ZodError } from 'zod';
 import { JWT_SECRET } from '../config';
 import { HttpException } from '../libs/HttpException';
+import { transformSqlError } from '../libs/handle-sql-errors';
 import { privateRoute } from '../middlewares/private-route';
 import authRoutes from './auth';
 import tagsRoutes from './tags';
@@ -36,15 +36,16 @@ router.use('/tags', privateRoute, tagsRoutes);
 
 router.use(function (err: unknown, req: Request, res: Response, next: NextFunction) {
   if (err instanceof HttpException) {
-    return res
+    res
       .status(err.code)
       .json({
         error: err,
       })
       .end();
+    return next();
   }
   if (err instanceof ZodError) {
-    return res
+    res
       .status(400)
       .json({
         error: {
@@ -54,20 +55,19 @@ router.use(function (err: unknown, req: Request, res: Response, next: NextFuncti
         },
       })
       .end();
+    return next();
   }
-  if (err instanceof QueryFailedError) {
-    return res
-      .status(500)
+  const sqlHttpException = transformSqlError(err);
+  if (sqlHttpException) {
+    res
+      .status(sqlHttpException.code)
       .json({
-        error: {
-          code: 500,
-          message: 'Internal error',
-          details: err,
-        },
+        error: sqlHttpException,
       })
       .end();
+    return next();
   }
-  return res
+  res
     .status(500)
     .json({
       error: {
@@ -77,6 +77,7 @@ router.use(function (err: unknown, req: Request, res: Response, next: NextFuncti
       },
     })
     .end();
+  return next();
 });
 
 export default router;

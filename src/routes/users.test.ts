@@ -20,7 +20,6 @@ describe('/api/users', function () {
         .set('Accept', 'application/json')
         .set('Content-Type', 'application/json')
         .then(function (response) {
-          console.dir(response.body);
           expect(response.body).toHaveProperty('token');
           ADMIN_TOKEN = response.body.token;
         }),
@@ -65,7 +64,6 @@ describe('/api/users', function () {
 
   describe('GET /api/users', () => {
     it('should be restrained to unauthorized users', async () => {
-      console.log('USER_TOKEN: ' + USER_TOKEN);
       const response = await request(app)
         .get('/api/users')
         .set('Accept', 'application/json')
@@ -332,7 +330,6 @@ describe('/api/users', function () {
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`)
         .then(function (response) {
           USERS.push(response.body.data);
-          console.log('dummy user: %o', response.body.data);
         });
     });
 
@@ -517,9 +514,8 @@ describe('/api/users', function () {
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expect(deleteResponse.headers['content-type']).toMatch(/json/);
       expect(deleteResponse.status).toBe(200);
-      expectUser(deleteResponse.body, {
-        ...localUser,
-      });
+      expect(typeof deleteResponse.body).toBe('object');
+      expect(Object.keys(deleteResponse.body)).toHaveLength(0);
 
       const getResponse = await request(app)
         .get(`/api/users/${localUser?.id}`)

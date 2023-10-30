@@ -9,6 +9,10 @@ import { passwordEncryptionService } from '../services/PasswordEncryptionService
 
 const router = express.Router();
 
+function renderUser(user: User) {
+  return omit(user, ['encryptedPassword']);
+}
+
 router.get('/', minRole(UserRole.ADMIN), async function (req, res) {
   const LIMIT = 20;
   const page = (Number(req.query.page) || 1) - 1;
@@ -19,7 +23,7 @@ router.get('/', minRole(UserRole.ADMIN), async function (req, res) {
   return res
     .status(200)
     .json({
-      data: dbUsers,
+      data: dbUsers.map(renderUser),
     })
     .end();
 });
@@ -39,7 +43,7 @@ router.get('/:id', async function (req, res, next) {
   return res
     .status(200)
     .json({
-      data: dbUser,
+      data: renderUser(dbUser),
     })
     .end();
 });
@@ -57,7 +61,10 @@ router.post('/', minRole(UserRole.ADMIN), async function (req, res, next) {
       role: body.role,
       encryptedPassword: await passwordEncryptionService.encryptPassword(body.password),
     });
-    return res.status(201).json({ data: dbUser }).end();
+    return res
+      .status(201)
+      .json({ data: renderUser(dbUser) })
+      .end();
   } catch (err) {
     return next(err);
   }
@@ -78,7 +85,10 @@ router.patch('/:id', minRole(UserRole.ADMIN), async function (req, res, next) {
       dbPayload.encryptedPassword = await passwordEncryptionService.encryptPassword(body.password);
     }
     const dbUser = await getRepository(User).save(dbPayload);
-    return res.status(200).json({ data: dbUser }).end();
+    return res
+      .status(200)
+      .json({ data: renderUser(dbUser) })
+      .end();
   } catch (err) {
     return next(err);
   }
