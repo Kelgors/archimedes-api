@@ -2,8 +2,6 @@ import { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { EntityNotFoundError } from 'typeorm';
 import { z } from 'zod';
-import { UserRole } from '../models/User';
-import { preHandlerBuilder } from '../plugins/require-role';
 import { ApiTagSchema, TagCreateInputSchema, TagUpdateInputSchema } from '../schemas/Tag';
 import { USER_ID } from '../schemas/User';
 import { tagService } from '../services/TagService';
@@ -16,7 +14,7 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'GET',
     url: '/api/tags',
-    preHandler: [fastify.parseJwtToken, fastify.ensureToken, preHandlerBuilder({ minRole: UserRole.ADMIN })],
+    preHandler: [fastify.authenticate],
     schema: {
       querystring: z
         .object({
@@ -44,7 +42,7 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'GET',
     url: '/api/tags/:id',
-    preHandler: [fastify.parseJwtToken, fastify.ensureToken, preHandlerBuilder({ minRole: UserRole.ADMIN })],
+    preHandler: [fastify.authenticate],
     schema: {
       params: z.object({
         id: z.string().uuid(),
@@ -74,7 +72,7 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'POST',
     url: '/api/tags',
-    preHandler: [fastify.parseJwtToken, fastify.ensureToken, preHandlerBuilder({ minRole: UserRole.ADMIN })],
+    preHandler: [fastify.authenticate],
     schema: {
       body: TagCreateInputSchema,
       response: {
@@ -95,7 +93,7 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'PATCH',
     url: '/api/tags/:id',
-    preHandler: [fastify.parseJwtToken, fastify.ensureToken, preHandlerBuilder({ minRole: UserRole.ADMIN })],
+    preHandler: [fastify.authenticate],
     schema: {
       params: z.object({
         id: USER_ID,
@@ -119,7 +117,7 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'DELETE',
     url: '/api/tags/:id',
-    preHandler: [fastify.parseJwtToken, fastify.ensureToken, preHandlerBuilder({ minRole: UserRole.ADMIN })],
+    preHandler: [fastify.authenticate],
     schema: {
       params: z.object({
         id: USER_ID,

@@ -3,7 +3,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { omit } from 'lodash';
 import { z } from 'zod';
 import { User, UserRole } from '../models/User';
-import { preHandlerBuilder as hasRoles } from '../plugins/require-role';
+import { hasRoles } from '../plugins/has-roles';
 import { USER_ID, UserCreateInputBodySchema, UserOutputSchema, UserUpdateInputBodySchema } from '../schemas/User';
 import { userService } from '../services/UserService';
 import { HttpException, HttpExceptionSchema } from '../utils/HttpException';
@@ -18,7 +18,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'GET',
     url: '/api/users',
-    preHandler: [fastify.authenticate, hasRoles({ roles: [UserRole.ADMIN] })],
+    preHandler: [fastify.authenticate, hasRoles(UserRole.ADMIN)],
     schema: {
       querystring: z
         .object({
@@ -74,7 +74,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'POST',
     url: '/api/users',
-    preHandler: [fastify.authenticate, hasRoles({ roles: [UserRole.ADMIN] })],
+    preHandler: [fastify.authenticate, hasRoles(UserRole.ADMIN)],
     schema: {
       body: UserCreateInputBodySchema,
       response: {
@@ -95,7 +95,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'PATCH',
     url: '/api/users/:id',
-    preHandler: [fastify.authenticate, hasRoles({ roles: [UserRole.ADMIN] })],
+    preHandler: [fastify.authenticate, hasRoles(UserRole.ADMIN)],
     schema: {
       params: z.object({
         id: USER_ID,
@@ -119,7 +119,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'DELETE',
     url: '/api/users/:id',
-    preHandler: [fastify.authenticate, hasRoles({ roles: [UserRole.ADMIN] })],
+    preHandler: [fastify.authenticate, hasRoles(UserRole.ADMIN)],
     schema: {
       params: z.object({
         id: USER_ID,
