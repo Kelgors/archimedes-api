@@ -1,8 +1,8 @@
 import { Express } from 'express';
 import request from 'supertest';
-import { UserRole } from '../models/User';
-import { User } from '../schemas/User';
-import { createServer } from '../server';
+import { UserRole } from '../../src/models/User';
+import { User } from '../../src/schemas/User';
+import { createServer } from '../../src/server';
 
 describe('/api/users', function () {
   let app: Express | undefined;

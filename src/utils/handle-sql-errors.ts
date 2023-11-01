@@ -1,8 +1,11 @@
 import { CONSTRAINT } from 'sqlite3';
-import { QueryFailedError } from 'typeorm';
+import { EntityNotFoundError, QueryFailedError } from 'typeorm';
 import { HttpException } from './HttpException';
 
 export function transformSqlError(error: unknown): HttpException | undefined {
+  if (error instanceof EntityNotFoundError) {
+    return new HttpException(404, 'Not found');
+  }
   if (error instanceof QueryFailedError) {
     return transformSqliteError(error);
   }

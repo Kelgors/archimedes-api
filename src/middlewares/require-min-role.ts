@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
-import { HttpException } from '../libs/HttpException';
 import { UserRole } from '../models/User';
+import { HttpException } from '../utils/HttpException';
 
-export function minRole(minRoleValue: UserRole) {
+export function requireMinRole(minRoleValue: UserRole) {
   return function minRoleHandler(req: Request, res: Response, next: NextFunction) {
     const role = req.token.role;
     if (role < minRoleValue) {

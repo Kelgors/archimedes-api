@@ -1,6 +1,6 @@
 import { Express } from 'express';
 import request from 'supertest';
-import { createServer } from '../server';
+import { createServer } from '../../src/server';
 
 describe('/api/auth', function () {
   let app: Express | undefined;

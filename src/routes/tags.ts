@@ -1,7 +1,7 @@
 import express from 'express';
 import { getRepository } from '../db';
-import { HttpException } from '../libs/HttpException';
 import { Tag } from '../models/Tag';
+import { HttpException } from '../utils/HttpException';
 
 const router = express.Router();
 

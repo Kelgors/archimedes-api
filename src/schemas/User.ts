@@ -23,4 +23,5 @@ export const ApiUserSchema = z.object({
 });
 
 export type UserCreateInput = z.infer<typeof UserCreateInputSchema>;
+export type UserUpdateInput = z.infer<typeof UserUpdateInputSchema>;
 export type User = z.infer<typeof ApiUserSchema>;
