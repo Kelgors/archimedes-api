@@ -132,7 +132,6 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
       params: z.object({
         id: USER_ID,
       }),
-      body: UserUpdateInputSchema,
       response: {
         200: z.object({}),
         404: z.object({
