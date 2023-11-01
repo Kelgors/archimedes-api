@@ -12,10 +12,12 @@ class AuthService {
     if (!dbUser) {
       throw new AppError(AppErrorCode.WRONG_EMAIL_OR_PASSWORD, 'User with email/password pair not found');
     }
+
     const isPasswordCorrect = await passwordEncryptionService.verifyPassword(dbUser.encryptedPassword, plainPassword);
     if (!isPasswordCorrect) {
       throw new AppError(AppErrorCode.WRONG_EMAIL_OR_PASSWORD, 'User with email/password pair not found');
     }
+
     return {
       sub: dbUser.id,
       role: dbUser.role,

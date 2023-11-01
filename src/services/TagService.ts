@@ -12,6 +12,7 @@ class TagService implements ICrudService<Tag, TagCreateInput, TagUpdateInput> {
       take,
     });
   }
+
   findAllByUserId(userId: string, options?: FindAllOptions | undefined): Promise<Tag[]> {
     const take = Math.min(options?.perPage || 20, 50);
     const skip = ((options?.page || 1) - 1) * take;
@@ -33,12 +34,15 @@ class TagService implements ICrudService<Tag, TagCreateInput, TagUpdateInput> {
       where: { id },
     });
   }
+
   create(input: { name: string }): Promise<Tag> {
     throw new Error('Method not implemented.');
   }
+
   update(id: string, input: { name: string }): Promise<Tag> {
     throw new Error('Method not implemented.');
   }
+
   delete(id: string): Promise<boolean> {
     throw new Error('Method not implemented.');
   }
