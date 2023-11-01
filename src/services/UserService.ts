@@ -1,10 +1,10 @@
 import { omit } from 'lodash';
 import { QueryFailedError } from 'typeorm';
+import { FindAllOptions, ICrudService } from '../@types/ICrudService';
 import { getRepository } from '../db';
 import { User } from '../models/User';
 import { UserCreateInputBody, UserUpdateInputBody } from '../schemas/User';
 import { HttpException } from '../utils/HttpException';
-import { FindAllOptions, ICrudService } from './ICrudService';
 import { passwordEncryptionService } from './PasswordEncryptionService';
 
 class UserService implements ICrudService<User, UserCreateInputBody, UserUpdateInputBody> {
@@ -16,11 +16,13 @@ class UserService implements ICrudService<User, UserCreateInputBody, UserUpdateI
       take,
     });
   }
+
   async findOne(id: string): Promise<User> {
     return getRepository(User).findOneOrFail({
       where: { id },
     });
   }
+
   async create(input: UserCreateInputBody): Promise<User> {
     try {
       return await getRepository(User).save({

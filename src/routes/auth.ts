@@ -10,8 +10,6 @@ const buildAuthRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'POST',
     url: '/api/auth/sign',
-    preValidation: [],
-    preHandler: [],
     schema: {
       body: AuthSignInputBodySchema,
       response: {
@@ -22,7 +20,11 @@ const buildAuthRoutes = function (fastify: FastifyInstance) {
     },
     handler: async function (req, reply) {
       const token = await authService.signIn(req.body.email, req.body.password);
-      return reply.code(201).send({ token });
+      return reply.code(201).send({
+        token: fastify.jwt.sign(token, {
+          algorithm: 'HS256',
+        }),
+      });
     },
   });
 };

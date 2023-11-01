@@ -1,10 +1,11 @@
 import { z } from 'zod';
+import { UserRole } from '../models/User';
 
 export const USER_ID = z.string().uuid();
 export const USER_EMAIL = z.string().email();
 export const USER_NAME = z.string();
 export const USER_PLAIN_PASSWORD = z.string().min(12);
-export const USER_ROLE = z.number().positive().int();
+export const USER_ROLE = z.nativeEnum(UserRole);
 
 export const UserCreateInputBodySchema = z.object({
   email: USER_EMAIL,

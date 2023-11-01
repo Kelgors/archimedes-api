@@ -1,10 +1,9 @@
 import { z } from 'zod';
-import { UserRole } from '../models/User';
-import { USER_EMAIL, USER_PLAIN_PASSWORD } from './User';
+import { USER_EMAIL, USER_ID, USER_PLAIN_PASSWORD, USER_ROLE } from './User';
 
 export const TokenSchema = z.object({
-  sub: z.string(),
-  role: z.nativeEnum(UserRole),
+  sub: USER_ID,
+  role: USER_ROLE,
   exp: z.number(),
 });
 

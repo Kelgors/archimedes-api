@@ -1,7 +1,7 @@
 {
   "name": "api",
   "version": "1.0.0",
-  "description": "",
+  "description": "API to save bookmarks (links) in list, tagged and shareable",
   "main": "dist/src/index.js",
   "scripts": {
     "start": "node dist/index.ts",
@@ -16,7 +16,10 @@
     "db:reset:test": "dotenv -e .env.test -- npm run db:reset",
     "test": "npm run db:reset:test && nyc jest"
   },
-  "author": "",
+  "author": {
+    "name": "Matthieu BOHEAS",
+    "url": "https://www.kelgors.me"
+  },
   "license": "ISC",
   "devDependencies": {
     "@jest/globals": "^29.7.0",
@@ -34,6 +37,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@fastify/jwt": "^7.2.2",
     "argon2": "^0.31.1",
     "dotenv": "^16.3.1",
     "dotenv-cli": "^7.3.0",
@@ -41,14 +45,10 @@
     "fastify": "^4.24.3",
     "fastify-plugin": "^4.5.1",
     "fastify-type-provider-zod": "^1.1.9",
-    "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "reflect-metadata": "^0.1.13",
     "sqlite3": "^5.1.6",
     "typeorm": "^0.3.17",
     "zod": "^3.22.4"
-  },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
   }
 }

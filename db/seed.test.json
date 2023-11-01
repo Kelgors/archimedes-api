@@ -5,14 +5,14 @@
       "email": "admin@test.me",
       "name": "Admin Test",
       "encryptedPassword": "$argon2id$v=19$m=65536,t=3,p=4$xO2j7wT/+tFQlpAx9ZZEow$+FMP9BjaS+TpyYXma/kM4FshEgsJkPI4u/0G3fI1WPw",
-      "role": 1000
+      "role": "ADMIN"
     },
     {
       "id": "7b98f3e9-a1a4-4793-bd0c-941aade24003",
       "email": "user@test.me",
       "name": "User Test",
       "encryptedPassword": "$argon2id$v=19$m=65536,t=3,p=4$xO2j7wT/+tFQlpAx9ZZEow$+FMP9BjaS+TpyYXma/kM4FshEgsJkPI4u/0G3fI1WPw",
-      "role": 100
+      "role": "USER"
     }
   ],
   "lists": [
