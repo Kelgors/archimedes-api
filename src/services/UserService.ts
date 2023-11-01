@@ -2,12 +2,12 @@ import { omit } from 'lodash';
 import { QueryFailedError } from 'typeorm';
 import { getRepository } from '../db';
 import { User } from '../models/User';
-import { UserCreateInput, UserUpdateInput } from '../schemas/User';
+import { UserCreateInputBody, UserUpdateInputBody } from '../schemas/User';
 import { HttpException } from '../utils/HttpException';
 import { FindAllOptions, ICrudService } from './ICrudService';
 import { passwordEncryptionService } from './PasswordEncryptionService';
 
-class UserService implements ICrudService<User, UserCreateInput, UserUpdateInput> {
+class UserService implements ICrudService<User, UserCreateInputBody, UserUpdateInputBody> {
   async findAll(options: FindAllOptions): Promise<User[]> {
     const take = Math.min(options.perPage || 20, 50);
     const skip = ((options.page || 1) - 1) * take;
@@ -21,7 +21,7 @@ class UserService implements ICrudService<User, UserCreateInput, UserUpdateInput
       where: { id },
     });
   }
-  async create(input: UserCreateInput): Promise<User> {
+  async create(input: UserCreateInputBody): Promise<User> {
     try {
       return await getRepository(User).save({
         email: input.email,
@@ -39,7 +39,7 @@ class UserService implements ICrudService<User, UserCreateInput, UserUpdateInput
     }
   }
 
-  async update(id: string, input: UserUpdateInput): Promise<User> {
+  async update(id: string, input: UserUpdateInputBody): Promise<User> {
     const dbOriginalUser = await getRepository(User).findOneOrFail({
       where: { id },
     });

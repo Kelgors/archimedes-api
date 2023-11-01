@@ -4,7 +4,7 @@ import { omit } from 'lodash';
 import { z } from 'zod';
 import { User, UserRole } from '../models/User';
 import { preHandlerBuilder } from '../plugins/require-min-role';
-import { ApiUserSchema, USER_ID, UserCreateInputSchema, UserUpdateInputSchema } from '../schemas/User';
+import { USER_ID, UserCreateInputBodySchema, UserOutputSchema, UserUpdateInputBodySchema } from '../schemas/User';
 import { userService } from '../services/UserService';
 import { HttpException, HttpExceptionSchema } from '../utils/HttpException';
 
@@ -28,7 +28,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
         .partial(),
       response: {
         200: z.object({
-          data: z.array(ApiUserSchema),
+          data: z.array(UserOutputSchema),
         }),
       },
     },
@@ -53,7 +53,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
       }),
       response: {
         200: z.object({
-          data: ApiUserSchema,
+          data: UserOutputSchema,
         }),
         404: z.object({
           error: HttpExceptionSchema,
@@ -76,10 +76,10 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
     url: '/api/users',
     preHandler: [fastify.parseJwtToken, fastify.ensureToken, preHandlerBuilder({ minRole: UserRole.ADMIN })],
     schema: {
-      body: UserCreateInputSchema,
+      body: UserCreateInputBodySchema,
       response: {
         200: z.object({
-          data: ApiUserSchema,
+          data: UserOutputSchema,
         }),
         404: z.object({
           error: HttpExceptionSchema,
@@ -100,10 +100,10 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
       params: z.object({
         id: USER_ID,
       }),
-      body: UserUpdateInputSchema,
+      body: UserUpdateInputBodySchema,
       response: {
         200: z.object({
-          data: ApiUserSchema,
+          data: UserOutputSchema,
         }),
         404: z.object({
           error: HttpExceptionSchema,

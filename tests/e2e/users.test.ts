@@ -1,7 +1,7 @@
 import { FastifyInstance, RawServerDefault } from 'fastify';
 import request from 'supertest';
 import { UserRole } from '../../src/models/User';
-import { User } from '../../src/schemas/User';
+import { UserOutput } from '../../src/schemas/User';
 import { createServer } from '../../src/server';
 
 describe('/api/users', function () {
@@ -41,7 +41,7 @@ describe('/api/users', function () {
   });
   afterAll(() => fastify?.close());
 
-  function expectUser(body: any, user: Partial<User>) {
+  function expectUser(body: any, user: Partial<UserOutput>) {
     expect(body).toHaveProperty('data');
     expect(body.data).toBeDefined();
     if ('id' in user) {
@@ -316,7 +316,7 @@ describe('/api/users', function () {
   });
 
   describe('PATCH /api/users', () => {
-    const USERS: User[] = [];
+    const USERS: UserOutput[] = [];
     let index = 0;
     beforeEach(function () {
       const position = index++;
@@ -470,7 +470,7 @@ describe('/api/users', function () {
   });
 
   describe('DELETE /api/users/:id', function () {
-    const USERS: User[] = [];
+    const USERS: UserOutput[] = [];
     let index = 0;
     beforeEach(function () {
       const position = index++;
