@@ -3,8 +3,8 @@ import { List } from './List';
 import { ListPermission } from './ListPermission';
 
 export enum UserRole {
-  USER = 100,
-  ADMIN = 1000,
+  USER = 'USER',
+  ADMIN = 'ADMIN',
 }
 
 @Entity()
@@ -22,7 +22,7 @@ export class User {
   @Column()
   encryptedPassword: string;
 
-  @Column({ type: Number, default: 100 })
+  @Column({ type: String, default: UserRole.USER })
   role: UserRole;
 
   @OneToMany(() => List, (list) => list.owner)

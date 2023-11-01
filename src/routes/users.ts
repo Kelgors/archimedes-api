@@ -3,7 +3,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { omit } from 'lodash';
 import { z } from 'zod';
 import { User, UserRole } from '../models/User';
-import { preHandlerBuilder } from '../plugins/require-min-role';
+import { preHandlerBuilder as hasRoles } from '../plugins/require-role';
 import { USER_ID, UserCreateInputBodySchema, UserOutputSchema, UserUpdateInputBodySchema } from '../schemas/User';
 import { userService } from '../services/UserService';
 import { HttpException, HttpExceptionSchema } from '../utils/HttpException';
@@ -18,7 +18,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'GET',
     url: '/api/users',
-    preHandler: [fastify.parseJwtToken, fastify.ensureToken, preHandlerBuilder({ minRole: UserRole.ADMIN })],
+    preHandler: [fastify.parseJwtToken, fastify.ensureToken, hasRoles({ roles: [UserRole.ADMIN] })],
     schema: {
       querystring: z
         .object({
@@ -49,7 +49,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
     preHandler: [fastify.parseJwtToken, fastify.ensureToken],
     schema: {
       params: z.object({
-        id: z.string(),
+        id: USER_ID.or(z.enum(['me'])),
       }),
       response: {
         200: z.object({
@@ -62,7 +62,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
     },
     handler: async function (req, reply) {
       // Check if asking for another user than the requesting one && is not admin
-      if (req.params.id !== 'me' && (req.token?.role || 0) < UserRole.ADMIN) {
+      if (req.params.id !== 'me' && req.token.role !== UserRole.ADMIN) {
         throw new HttpException(403, 'Forbidden', 'Not sufficient permissions');
       }
       const id = req.params.id === 'me' ? req.token.sub || '' : req.params.id;
@@ -74,7 +74,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'POST',
     url: '/api/users',
-    preHandler: [fastify.parseJwtToken, fastify.ensureToken, preHandlerBuilder({ minRole: UserRole.ADMIN })],
+    preHandler: [fastify.parseJwtToken, fastify.ensureToken, hasRoles({ roles: [UserRole.ADMIN] })],
     schema: {
       body: UserCreateInputBodySchema,
       response: {
@@ -95,7 +95,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'PATCH',
     url: '/api/users/:id',
-    preHandler: [fastify.parseJwtToken, fastify.ensureToken, preHandlerBuilder({ minRole: UserRole.ADMIN })],
+    preHandler: [fastify.parseJwtToken, fastify.ensureToken, hasRoles({ roles: [UserRole.ADMIN] })],
     schema: {
       params: z.object({
         id: USER_ID,
@@ -119,7 +119,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'DELETE',
     url: '/api/users/:id',
-    preHandler: [fastify.parseJwtToken, fastify.ensureToken, preHandlerBuilder({ minRole: UserRole.ADMIN })],
+    preHandler: [fastify.parseJwtToken, fastify.ensureToken, hasRoles({ roles: [UserRole.ADMIN] })],
     schema: {
       params: z.object({
         id: USER_ID,

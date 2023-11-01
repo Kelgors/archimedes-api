@@ -7,9 +7,18 @@ import { HttpException } from '../utils/HttpException';
 import buildAuthRoutes from './auth';
 import buildUserRoutes from './users';
 
-const routesBuilder: FastifyPluginAsync<{ urlPrefix: string }> = async function (fastify, options) {
+const routesBuilder: FastifyPluginAsync<{}> = async function (fastify) {
   buildAuthRoutes(fastify);
   buildUserRoutes(fastify);
+
+  fastify.all('/api/*', function (req, reply) {
+    reply.code(404).send({
+      error: {
+        code: 404,
+        message: `Route ${req.method}:${req.url} not found`,
+      },
+    });
+  });
 
   fastify.setErrorHandler(async function (error: unknown, req, reply) {
     if (error instanceof EntityNotFoundError) {

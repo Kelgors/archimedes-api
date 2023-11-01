@@ -3,7 +3,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { EntityNotFoundError } from 'typeorm';
 import { z } from 'zod';
 import { UserRole } from '../models/User';
-import { preHandlerBuilder } from '../plugins/require-min-role';
+import { preHandlerBuilder } from '../plugins/require-role';
 import { ApiTagSchema, TagCreateInputSchema, TagUpdateInputSchema } from '../schemas/Tag';
 import { USER_ID } from '../schemas/User';
 import { tagService } from '../services/TagService';

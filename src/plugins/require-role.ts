@@ -6,7 +6,7 @@ import { AppPreHandlerAsyncHookHandler } from '../utils/AppRouteOptions';
 import { HttpException } from '../utils/HttpException';
 
 type PluginOptions = {
-  minRole: UserRole;
+  roles: UserRole[];
 };
 const requireMinRolePlugin: FastifyPluginAsync<PluginOptions> = async function (fastify, options) {
   fastify.withTypeProvider<ZodTypeProvider>().addHook('preHandler', preHandlerBuilder(options));
@@ -14,7 +14,7 @@ const requireMinRolePlugin: FastifyPluginAsync<PluginOptions> = async function (
 
 export function preHandlerBuilder(options: PluginOptions): AppPreHandlerAsyncHookHandler {
   return async function preHandler(req, reply) {
-    if (req.token.role < options.minRole) {
+    if (!options.roles.includes(req.token.role)) {
       throw new HttpException(403, 'Forbidden', 'Not sufficient permissions');
     }
   };
