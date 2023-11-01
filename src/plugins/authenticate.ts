@@ -4,6 +4,7 @@ import fp from 'fastify-plugin';
 import { JWT_SECRET } from '../config';
 import { Token, TokenSchema } from '../schemas/Auth';
 import { AppPreHandlerAsyncHookHandler } from '../utils/AppRouteOptions';
+import { HttpException } from '../utils/HttpException';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -24,7 +25,9 @@ const setupJwtTokenAuth: FastifyPluginAsync<never> = async function (fastify) {
       await req.jwtVerify();
       req.token = await TokenSchema.parseAsync(req.user);
     } catch (err) {
-      console.dir(err);
+      if (typeof err === 'object' && err && 'message' in err && typeof err.message === 'string') {
+        throw new HttpException(401, err.message);
+      }
       throw err;
     }
   });

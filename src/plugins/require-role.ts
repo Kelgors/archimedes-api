@@ -15,9 +15,9 @@ const requireMinRolePlugin: FastifyPluginAsync<PluginOptions> = async function (
 export function preHandlerBuilder(options: PluginOptions): AppPreHandlerAsyncHookHandler {
   return async function preHandler(req, reply) {
     if (!options.roles.includes(req.token.role)) {
-      throw new HttpException(403, 'Forbidden', 'Not sufficient permissions');
+      throw new HttpException(401, 'Unauthorized', 'Not sufficient permissions');
     }
   };
 }
 
-export default fp(requireMinRolePlugin, '4.x');
+export default fp(requireMinRolePlugin);

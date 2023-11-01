@@ -66,12 +66,36 @@ describe('/api/users', function () {
   }
 
   describe('GET /api/users', () => {
+    it('should be restrained to anonymous users', async () => {
+      const response = await request(app).get('/api/users').set('Accept', 'application/json');
+      expectError(response, 401);
+    });
+
+    it('should be restrained to invalid users', async () => {
+      const response = await request(app)
+        .get('/api/users')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer JaimeLePate`);
+      expectError(response, 401);
+    });
+
+    it('should be restrained to expired token', async () => {
+      const response = await request(app)
+        .get('/api/users')
+        .set('Accept', 'application/json')
+        .set(
+          'Authorization',
+          `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4M2VmYzBjYy01NjU1LTQwYTctYjFkZS1mM2EzOWY5NWM0NDAiLCJyb2xlIjoiQURNSU4iLCJleHAiOjE2OTg4Njk0NzYsImlhdCI6MTY5ODg2OTQ3NX0.RW76aZBI8d1Pkl8cIedhBPc1wfU4biOus12gbSQS4Pg`,
+        );
+      expectError(response, 401);
+    });
+
     it('should be restrained to unauthorized users', async () => {
       const response = await request(app)
         .get('/api/users')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${USER_TOKEN}`);
-      expectError(response, 403);
+      expectError(response, 401);
     });
 
     it('should have at least one entry', async () => {
@@ -84,15 +108,65 @@ describe('/api/users', function () {
       expect(response.body.data).toBeInstanceOf(Array);
       expect(response.body.data.length).toBeGreaterThan(0);
     });
+
+    it('should be paginated', async () => {
+      const responsePage1 = await request(app)
+        .get('/api/users?page=1&perPage=1')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
+      expect(responsePage1.headers['content-type']).toMatch(/json/);
+      expect(responsePage1.status).toBe(200);
+      expect(responsePage1.body.data).toBeInstanceOf(Array);
+      expect(responsePage1.body.data).toHaveLength(1);
+      expect(typeof responsePage1.body.data[0].id).toBe('string');
+      const userId1 = responsePage1.body.data[0].id;
+
+      const responsePage2 = await request(app)
+        .get('/api/users?page=2&perPage=1')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
+      expect(responsePage2.headers['content-type']).toMatch(/json/);
+      expect(responsePage2.status).toBe(200);
+      expect(responsePage2.body.data).toBeInstanceOf(Array);
+      expect(responsePage2.body.data).toHaveLength(1);
+      expect(typeof responsePage2.body.data[0].id).toBe('string');
+      expect(responsePage2.body.data[0].id).not.toBe(userId1);
+    });
   });
 
   describe('GET /api/users/:id', () => {
+    it('should be restrained to anonymous users', async () => {
+      const response = await request(app)
+        .get('/api/users/83efc0cc-5655-40a7-b1de-f3a39f95c440')
+        .set('Accept', 'application/json');
+      expectError(response, 401);
+    });
+
+    it('should be restrained to invalid users', async () => {
+      const response = await request(app)
+        .get('/api/users/83efc0cc-5655-40a7-b1de-f3a39f95c440')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer JaimeLePate`);
+      expectError(response, 401);
+    });
+
+    it('should be restrained to expired token', async () => {
+      const response = await request(app)
+        .get('/api/users/83efc0cc-5655-40a7-b1de-f3a39f95c440')
+        .set('Accept', 'application/json')
+        .set(
+          'Authorization',
+          `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4M2VmYzBjYy01NjU1LTQwYTctYjFkZS1mM2EzOWY5NWM0NDAiLCJyb2xlIjoiQURNSU4iLCJleHAiOjE2OTg4Njk0NzYsImlhdCI6MTY5ODg2OTQ3NX0.RW76aZBI8d1Pkl8cIedhBPc1wfU4biOus12gbSQS4Pg`,
+        );
+      expectError(response, 401);
+    });
+
     it('should be restrained to unauthorized users', async () => {
       const response = await request(app)
         .get('/api/users/83efc0cc-5655-40a7-b1de-f3a39f95c440')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${USER_TOKEN}`);
-      expectError(response, 403);
+      expectError(response, 401);
     });
 
     it('should fetch user with correct id', async () => {
@@ -150,11 +224,58 @@ describe('/api/users', function () {
   });
 
   describe('POST /api/users', () => {
+    it('should be restrained to anonymous users', async () => {
+      const response = await request(app)
+        .post('/api/users')
+        .send({
+          email: 'not-authorized+anonymous@test.test',
+          name: 'Not-Authorized Test',
+          role: UserRole.ADMIN,
+          password: 'changemeplease3',
+        })
+        .set('Content-Type', 'application/json')
+        .set('Accept', 'application/json');
+      expectError(response, 401);
+    });
+
+    it('should be restrained to invalid users', async () => {
+      const response = await request(app)
+        .post('/api/users')
+        .send({
+          email: 'not-authorized+invalid@test.test',
+          name: 'Not-Authorized Test',
+          role: UserRole.ADMIN,
+          password: 'changemeplease3',
+        })
+        .set('Content-Type', 'application/json')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer JaimeLePate`);
+      expectError(response, 401);
+    });
+
+    it('should be restrained to expired token', async () => {
+      const response = await request(app)
+        .post('/api/users')
+        .send({
+          email: 'not-authorized+expired@test.test',
+          name: 'Not-Authorized Test',
+          role: UserRole.ADMIN,
+          password: 'changemeplease3',
+        })
+        .set('Content-Type', 'application/json')
+        .set('Accept', 'application/json')
+        .set(
+          'Authorization',
+          `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4M2VmYzBjYy01NjU1LTQwYTctYjFkZS1mM2EzOWY5NWM0NDAiLCJyb2xlIjoiQURNSU4iLCJleHAiOjE2OTg4Njk0NzYsImlhdCI6MTY5ODg2OTQ3NX0.RW76aZBI8d1Pkl8cIedhBPc1wfU4biOus12gbSQS4Pg`,
+        );
+      expectError(response, 401);
+    });
+
     it('should be restrained to unauthorized users', async () => {
       const response = await request(app)
         .post('/api/users')
         .send({
-          email: 'not-authorized@test.test',
+          email: 'not-authorized+permission@test.test',
           name: 'Not-Authorized Test',
           role: UserRole.ADMIN,
           password: 'changemeplease3',
@@ -162,7 +283,7 @@ describe('/api/users', function () {
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${USER_TOKEN}`);
-      expectError(response, 403);
+      expectError(response, 401);
     });
 
     it('should not create user without email', async () => {
@@ -336,6 +457,50 @@ describe('/api/users', function () {
         });
     });
 
+    it('should be restrained to anonymous users', async () => {
+      const localUser = USERS.pop();
+      expect(localUser).toBeDefined();
+      const response = await request(app)
+        .patch(`/api/users/${localUser?.id}`)
+        .send({
+          name: 'Not Authorized Test',
+        })
+        .set('Content-Type', 'application/json')
+        .set('Accept', 'application/json');
+      expectError(response, 401);
+    });
+
+    it('should be restrained to invalid users', async () => {
+      const localUser = USERS.pop();
+      expect(localUser).toBeDefined();
+      const response = await request(app)
+        .patch(`/api/users/${localUser?.id}`)
+        .send({
+          name: 'Not Authorized Test',
+        })
+        .set('Content-Type', 'application/json')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer JaimeLePate`);
+      expectError(response, 401);
+    });
+
+    it('should be restrained to expired token', async () => {
+      const localUser = USERS.pop();
+      expect(localUser).toBeDefined();
+      const response = await request(app)
+        .patch(`/api/users/${localUser?.id}`)
+        .send({
+          name: 'Not Authorized Test',
+        })
+        .set('Content-Type', 'application/json')
+        .set('Accept', 'application/json')
+        .set(
+          'Authorization',
+          `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4M2VmYzBjYy01NjU1LTQwYTctYjFkZS1mM2EzOWY5NWM0NDAiLCJyb2xlIjoiQURNSU4iLCJleHAiOjE2OTg4Njk0NzYsImlhdCI6MTY5ODg2OTQ3NX0.RW76aZBI8d1Pkl8cIedhBPc1wfU4biOus12gbSQS4Pg`,
+        );
+      expectError(response, 401);
+    });
+
     it('should be restrained to unauthorized users', async () => {
       const localUser = USERS.pop();
       expect(localUser).toBeDefined();
@@ -347,7 +512,7 @@ describe('/api/users', function () {
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${USER_TOKEN}`);
-      expectError(response, 403);
+      expectError(response, 401);
     });
 
     it('should update user name', async () => {
@@ -489,7 +654,37 @@ describe('/api/users', function () {
           USERS.push(response.body.data);
         });
     });
+    it('should be restrained to anonymous users', async () => {
+      const localUser = USERS.pop();
+      expect(localUser).toBeDefined();
+      const response = await request(app)
+        .delete(`/api/users/${localUser?.id}`)
+        .set('Accept', 'application/json');
+      expectError(response, 401);
+    });
 
+    it('should be restrained to invalid users', async () => {
+      const localUser = USERS.pop();
+      expect(localUser).toBeDefined();
+      const response = await request(app)
+        .delete(`/api/users/${localUser?.id}`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer JaimeLePate`);
+      expectError(response, 401);
+    });
+
+    it('should be restrained to expired token', async () => {
+      const localUser = USERS.pop();
+      expect(localUser).toBeDefined();
+      const response = await request(app)
+        .delete(`/api/users/${localUser?.id}`)
+        .set('Accept', 'application/json')
+        .set(
+          'Authorization',
+          `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4M2VmYzBjYy01NjU1LTQwYTctYjFkZS1mM2EzOWY5NWM0NDAiLCJyb2xlIjoiQURNSU4iLCJleHAiOjE2OTg4Njk0NzYsImlhdCI6MTY5ODg2OTQ3NX0.RW76aZBI8d1Pkl8cIedhBPc1wfU4biOus12gbSQS4Pg`,
+        );
+      expectError(response, 401);
+    });
     it('should be restrained to unauthorized users', async () => {
       const localUser = USERS.pop();
       expect(localUser).toBeDefined();
@@ -497,7 +692,7 @@ describe('/api/users', function () {
         .delete(`/api/users/${localUser?.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${USER_TOKEN}`);
-      expectError(response, 403);
+      expectError(response, 401);
     });
 
     it('should not delete unkown id', async () => {

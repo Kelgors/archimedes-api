@@ -45,4 +45,4 @@ const routesBuilder: FastifyPluginAsync<{}> = async function (fastify) {
   });
 };
 
-export default fp(routesBuilder, '4.x');
+export default fp(routesBuilder);

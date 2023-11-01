@@ -22,8 +22,8 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
     schema: {
       querystring: z
         .object({
-          page: z.number(),
-          perPage: z.number(),
+          page: z.string(),
+          perPage: z.string(),
         })
         .partial(),
       response: {
@@ -63,7 +63,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
     handler: async function (req, reply) {
       // Check if asking for another user than the requesting one && is not admin
       if (req.params.id !== 'me' && req.token.role !== UserRole.ADMIN) {
-        throw new HttpException(403, 'Forbidden', 'Not sufficient permissions');
+        throw new HttpException(401, 'Unauthorized', 'Not sufficient permissions');
       }
       const id = req.params.id === 'me' ? req.token.sub || '' : req.params.id;
       const dbUser = await userService.findOne(id);
