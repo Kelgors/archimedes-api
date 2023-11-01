@@ -9,10 +9,6 @@ npm install
 npm run db:reset:dev
 # Start dev server
 npm run start:dev
-# Launch tests
+# or Launch tests
 npm test
 ```
-
-## TODO
-
--

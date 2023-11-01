@@ -1,11 +1,13 @@
 import { omit } from 'lodash';
+import { QueryFailedError } from 'typeorm';
 import { getRepository } from '../db';
-import { FindAllOptions, ICrudService } from '../models/ICrudService';
 import { User } from '../models/User';
-import { UserCreateInput, UserUpdateInput } from '../schemas/User';
+import { UserCreateInputBody, UserUpdateInputBody } from '../schemas/User';
+import { HttpException } from '../utils/HttpException';
+import { FindAllOptions, ICrudService } from './ICrudService';
 import { passwordEncryptionService } from './PasswordEncryptionService';
 
-class UserService implements ICrudService<User, UserCreateInput, UserUpdateInput> {
+class UserService implements ICrudService<User, UserCreateInputBody, UserUpdateInputBody> {
   async findAll(options: FindAllOptions): Promise<User[]> {
     const take = Math.min(options.perPage || 20, 50);
     const skip = ((options.page || 1) - 1) * take;
@@ -14,21 +16,30 @@ class UserService implements ICrudService<User, UserCreateInput, UserUpdateInput
       take,
     });
   }
-  findOne(id: string): Promise<User> {
+  async findOne(id: string): Promise<User> {
     return getRepository(User).findOneOrFail({
       where: { id },
     });
   }
-  async create(input: UserCreateInput): Promise<User> {
-    return getRepository(User).save({
-      email: input.email,
-      name: input.name,
-      role: input.role,
-      encryptedPassword: await passwordEncryptionService.encryptPassword(input.password),
-    });
+  async create(input: UserCreateInputBody): Promise<User> {
+    try {
+      return await getRepository(User).save({
+        email: input.email,
+        name: input.name,
+        role: input.role,
+        encryptedPassword: await passwordEncryptionService.encryptPassword(input.password),
+      });
+    } catch (err) {
+      if (err instanceof QueryFailedError) {
+        if (err.message.includes('UNIQUE constraint failed: user.email')) {
+          throw new HttpException(400, 'email already exists');
+        }
+      }
+      throw err;
+    }
   }
 
-  async update(id: string, input: UserUpdateInput): Promise<User> {
+  async update(id: string, input: UserUpdateInputBody): Promise<User> {
     const dbOriginalUser = await getRepository(User).findOneOrFail({
       where: { id },
     });
@@ -36,7 +47,16 @@ class UserService implements ICrudService<User, UserCreateInput, UserUpdateInput
     if (input.password) {
       dbPayload.encryptedPassword = await passwordEncryptionService.encryptPassword(input.password);
     }
-    return getRepository(User).save(dbPayload);
+    try {
+      return await getRepository(User).save(dbPayload);
+    } catch (err) {
+      if (err instanceof QueryFailedError) {
+        if (err.message.includes('UNIQUE constraint failed: user.email')) {
+          throw new HttpException(400, 'email already exists');
+        }
+      }
+      throw err;
+    }
   }
 
   async delete(id: string): Promise<boolean> {

@@ -1,12 +1,15 @@
-import { Express } from 'express';
+import { FastifyInstance, RawServerDefault } from 'fastify';
 import request from 'supertest';
 import { createServer } from '../../src/server';
 
 describe('/api/auth', function () {
-  let app: Express | undefined;
+  let fastify: FastifyInstance | undefined;
+  let app: RawServerDefault | undefined;
   beforeAll(async function () {
-    app = await createServer();
+    fastify = await createServer();
+    app = fastify.server;
   });
+  afterAll(() => fastify?.close());
 
   describe('POST /api/auth/sign', () => {
     it('should successfuly connect', async () => {

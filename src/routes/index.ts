@@ -1,33 +1,39 @@
-import express from 'express';
-import { Request as JwtRequest, expressjwt } from 'express-jwt';
-import { JWT_SECRET } from '../config';
-import { handleErrorsMiddleware } from '../middlewares/handle-errors';
-import { requireJwtToken } from '../middlewares/require-jwt-token';
-import authRoutes from './auth';
-import tagsRoutes from './tags';
-import usersRoutes from './users';
+import { FastifyPluginAsync } from 'fastify';
+import fp from 'fastify-plugin';
+import { EntityNotFoundError } from 'typeorm';
+import { ZodError } from 'zod';
+import { AppError } from '../utils/ApplicationError';
+import { HttpException } from '../utils/HttpException';
+import buildAuthRoutes from './auth';
+import buildUserRoutes from './users';
 
-const router = express.Router();
+const routesBuilder: FastifyPluginAsync<{ urlPrefix: string }> = async function (fastify, options) {
+  buildAuthRoutes(fastify);
+  buildUserRoutes(fastify);
 
-router.use(
-  expressjwt({
-    secret: JWT_SECRET,
-    algorithms: ['HS256'],
-    credentialsRequired: false,
-  }),
-  async function (req: JwtRequest, res, next) {
-    // FIX doublons auth/token in request
-    const token = req.auth;
-    if (!token) return next();
-    req.token = token as any;
-    return next();
-  },
-);
+  fastify.setErrorHandler(async function (error: unknown, req, reply) {
+    if (error instanceof EntityNotFoundError) {
+      error = new HttpException(404, 'Not found');
+    }
+    if (error instanceof AppError) {
+      error = error.toHttpException();
+    }
+    if (error instanceof ZodError) {
+      error = new HttpException(400, 'Invalid format', error.issues);
+    }
+    if (error instanceof HttpException) {
+      return reply.code(error.code).send({
+        error,
+      });
+    }
+    return reply.code(500).send({
+      error: {
+        code: 500,
+        message: 'Unhandled error',
+        details: error,
+      },
+    });
+  });
+};
 
-router.use('/auth', authRoutes);
-router.use('/users', requireJwtToken, usersRoutes);
-router.use('/tags', requireJwtToken, tagsRoutes);
-
-router.use(handleErrorsMiddleware);
-
-export default router;
+export default fp(routesBuilder, '4.x');

@@ -1,21 +1,30 @@
-import express from 'express';
-import { AuthSignSchema } from '../schemas/Auth';
+import { FastifyInstance } from 'fastify';
+import { ZodTypeProvider } from 'fastify-type-provider-zod';
+import { z } from 'zod';
+import { AuthSignInputBodySchema } from '../schemas/Auth';
 import { authService } from '../services/AuthService';
 
-const router = express.Router();
+const buildAuthRoutes = function (fastify: FastifyInstance) {
+  const fastifyZod = fastify.withTypeProvider<ZodTypeProvider>();
 
-router.post('/sign', async function (req, res, next) {
-  const result = await AuthSignSchema.safeParseAsync(req.body);
-  if (!result.success) {
-    return next(result.error);
-  }
-  const body = result.data;
-  try {
-    const token = await authService.signIn(body.email, body.password);
-    return res.status(201).json({ token }).end();
-  } catch (err) {
-    return next(err);
-  }
-});
+  fastifyZod.route({
+    method: 'POST',
+    url: '/api/auth/sign',
+    preValidation: [],
+    preHandler: [],
+    schema: {
+      body: AuthSignInputBodySchema,
+      response: {
+        200: {
+          token: z.string(),
+        },
+      },
+    },
+    handler: async function (req, reply) {
+      const token = await authService.signIn(req.body.email, req.body.password);
+      return reply.code(201).send({ token });
+    },
+  });
+};
 
-export default router;
+export default buildAuthRoutes;

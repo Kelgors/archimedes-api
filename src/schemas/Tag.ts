@@ -11,9 +11,11 @@ export const TagUpdateInputSchema = z.object({
   name: TAG_NAME,
 });
 
-export const TagSchema = z.object({
+export const ApiTagSchema = z.object({
   id: TAG_ID,
   name: TAG_NAME,
 });
 
-export type Tag = z.infer<typeof TagSchema>;
+export type Tag = z.infer<typeof ApiTagSchema>;
+export type TagCreateInput = z.infer<typeof TagCreateInputSchema>;
+export type TagUpdateInput = z.infer<typeof TagUpdateInputSchema>;
