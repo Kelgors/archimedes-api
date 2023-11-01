@@ -8,10 +8,10 @@ export const TokenSchema = z.object({
   exp: z.number(),
 });
 
-export const AuthSignSchema = z.object({
+export const AuthSignInputBodySchema = z.object({
   email: USER_EMAIL,
   password: USER_PLAIN_PASSWORD,
 });
 
 export type Token = z.infer<typeof TokenSchema>;
-export type AuthSign = z.infer<typeof AuthSignSchema>;
+export type AuthSignBody = z.infer<typeof AuthSignInputBodySchema>;

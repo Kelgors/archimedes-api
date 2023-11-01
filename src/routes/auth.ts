@@ -1,18 +1,19 @@
 import { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { AuthSignSchema } from '../schemas/Auth';
+import { AuthSignInputBodySchema } from '../schemas/Auth';
 import { authService } from '../services/AuthService';
 
 const buildAuthRoutes = function (fastify: FastifyInstance) {
   const fastifyZod = fastify.withTypeProvider<ZodTypeProvider>();
+
   fastifyZod.route({
     method: 'POST',
     url: '/api/auth/sign',
     preValidation: [],
     preHandler: [],
     schema: {
-      body: AuthSignSchema,
+      body: AuthSignInputBodySchema,
       response: {
         200: {
           token: z.string(),

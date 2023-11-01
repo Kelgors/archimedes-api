@@ -4,8 +4,8 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 import { JWT_SECRET, NODE_ENV } from './config';
 import { AppDataSource } from './db';
 import loggingByEnv from './logging';
-import parseJwtToken from './middlewares/parse-jwt-token';
-import requireJwtToken from './middlewares/require-jwt-token';
+import parseJwtToken from './plugins/parse-jwt-token';
+import requireJwtToken from './plugins/require-jwt-token';
 import apiV1 from './routes';
 
 export async function createServer() {
