@@ -1,8 +1,10 @@
 import { omit } from 'lodash';
+import { QueryFailedError } from 'typeorm';
 import { getRepository } from '../db';
 import { FindAllOptions, ICrudService } from '../models/ICrudService';
 import { User } from '../models/User';
 import { UserCreateInput, UserUpdateInput } from '../schemas/User';
+import { HttpException } from '../utils/HttpException';
 import { passwordEncryptionService } from './PasswordEncryptionService';
 
 class UserService implements ICrudService<User, UserCreateInput, UserUpdateInput> {
@@ -20,12 +22,23 @@ class UserService implements ICrudService<User, UserCreateInput, UserUpdateInput
     });
   }
   async create(input: UserCreateInput): Promise<User> {
-    return getRepository(User).save({
-      email: input.email,
-      name: input.name,
-      role: input.role,
-      encryptedPassword: await passwordEncryptionService.encryptPassword(input.password),
-    });
+    try {
+      return getRepository(User).save({
+        email: input.email,
+        name: input.name,
+        role: input.role,
+        encryptedPassword: await passwordEncryptionService.encryptPassword(input.password),
+      });
+    } catch (err) {
+      console.log('Error from create()');
+      if (err instanceof QueryFailedError) {
+        console.log(`name: %s, message: %s`, err.name, err.message);
+        if (err.message === 'UNIQUE constraint failed: user.email') {
+          throw new HttpException(400, 'email already exists');
+        }
+      }
+      throw err;
+    }
   }
 
   async update(id: string, input: UserUpdateInput): Promise<User> {

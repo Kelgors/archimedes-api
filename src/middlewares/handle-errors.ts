@@ -1,9 +1,14 @@
-import { NextFunction, Request, Response } from 'express';
-import { ZodError } from 'zod';
-import { AppError } from '../utils/ApplicationError';
+import { onErrorAsyncHookHandler } from 'fastify';
 import { HttpException } from '../utils/HttpException';
-import { transformSqlError } from '../utils/handle-sql-errors';
 
+function transformErrorToHttpException(error: unknown): HttpException | null {
+  return null;
+}
+
+const onError: onErrorAsyncHookHandler = async function (error, req, reply) {};
+
+export default onError;
+/*
 export function handleErrorsMiddleware(err: unknown, req: Request, res: Response, next: NextFunction) {
   if (err instanceof AppError) {
     err = err.toHttpException();
@@ -52,3 +57,4 @@ export function handleErrorsMiddleware(err: unknown, req: Request, res: Response
     .end();
   return next();
 }
+*/

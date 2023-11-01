@@ -1,15 +1,17 @@
-import { Express } from 'express';
+import { FastifyInstance, RawServerDefault } from 'fastify';
 import request from 'supertest';
 import { UserRole } from '../../src/models/User';
 import { User } from '../../src/schemas/User';
 import { createServer } from '../../src/server';
 
 describe('/api/users', function () {
-  let app: Express | undefined;
+  let fastify: FastifyInstance | undefined;
+  let app: RawServerDefault | undefined;
   let ADMIN_TOKEN = '';
   let USER_TOKEN = '';
   beforeAll(async function () {
-    app = await createServer();
+    fastify = await createServer();
+    app = fastify.server;
     await Promise.all([
       request(app)
         .post('/api/auth/sign')
@@ -37,6 +39,7 @@ describe('/api/users', function () {
         }),
     ]);
   });
+  afterAll(() => fastify?.close());
 
   function expectUser(body: any, user: Partial<User>) {
     expect(body).toHaveProperty('data');

@@ -1,5 +1,4 @@
 {
-  "files": ["src/express.d.ts"],
   "include": ["./**/*.ts"],
   "exclude": ["node_modules/**/*"],
   "compilerOptions": {
