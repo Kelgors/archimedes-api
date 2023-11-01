@@ -18,7 +18,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'GET',
     url: '/api/users',
-    preHandler: [fastify.parseJwtToken, fastify.ensureToken, hasRoles({ roles: [UserRole.ADMIN] })],
+    preHandler: [fastify.authenticate, hasRoles({ roles: [UserRole.ADMIN] })],
     schema: {
       querystring: z
         .object({
@@ -46,7 +46,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'GET',
     url: '/api/users/:id',
-    preHandler: [fastify.parseJwtToken, fastify.ensureToken],
+    preHandler: [fastify.authenticate],
     schema: {
       params: z.object({
         id: USER_ID.or(z.enum(['me'])),
@@ -74,7 +74,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'POST',
     url: '/api/users',
-    preHandler: [fastify.parseJwtToken, fastify.ensureToken, hasRoles({ roles: [UserRole.ADMIN] })],
+    preHandler: [fastify.authenticate, hasRoles({ roles: [UserRole.ADMIN] })],
     schema: {
       body: UserCreateInputBodySchema,
       response: {
@@ -95,7 +95,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'PATCH',
     url: '/api/users/:id',
-    preHandler: [fastify.parseJwtToken, fastify.ensureToken, hasRoles({ roles: [UserRole.ADMIN] })],
+    preHandler: [fastify.authenticate, hasRoles({ roles: [UserRole.ADMIN] })],
     schema: {
       params: z.object({
         id: USER_ID,
@@ -119,7 +119,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'DELETE',
     url: '/api/users/:id',
-    preHandler: [fastify.parseJwtToken, fastify.ensureToken, hasRoles({ roles: [UserRole.ADMIN] })],
+    preHandler: [fastify.authenticate, hasRoles({ roles: [UserRole.ADMIN] })],
     schema: {
       params: z.object({
         id: USER_ID,
