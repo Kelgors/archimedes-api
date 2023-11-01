@@ -1,7 +1,7 @@
 import { getRepository } from '../db';
-import { FindAllOptions, ICrudService } from '../models/ICrudService';
 import { Tag } from '../models/Tag';
 import { TagCreateInput, TagUpdateInput } from '../schemas/Tag';
+import { FindAllOptions, ICrudService } from './ICrudService';
 
 class TagService implements ICrudService<Tag, TagCreateInput, TagUpdateInput> {
   findAll(options?: FindAllOptions | undefined): Promise<Tag[]> {

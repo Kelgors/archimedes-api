@@ -1,7 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { omit } from 'lodash';
-import { EntityNotFoundError } from 'typeorm';
 import { z } from 'zod';
 import { preHandlerBuilder } from '../middlewares/require-min-role';
 import { User, UserRole } from '../models/User';
@@ -47,7 +46,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'GET',
     url: '/api/users/:id',
-    preHandler: [fastify.parseJwtToken, fastify.ensureToken, preHandlerBuilder({ minRole: UserRole.ADMIN })],
+    preHandler: [fastify.parseJwtToken, fastify.ensureToken],
     schema: {
       params: z.object({
         id: z.string(),
@@ -67,15 +66,8 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
         throw new HttpException(403, 'Forbidden', 'Not sufficient permissions');
       }
       const id = req.params.id === 'me' ? req.token.sub || '' : req.params.id;
-      try {
-        const dbUser = await userService.findOne(id);
-        return reply.code(200).send({ data: renderUser(dbUser) });
-      } catch (err) {
-        if (err instanceof EntityNotFoundError) {
-          throw new HttpException(404, 'User not found');
-        }
-        throw err;
-      }
+      const dbUser = await userService.findOne(id);
+      return reply.code(200).send({ data: renderUser(dbUser) });
     },
   });
 

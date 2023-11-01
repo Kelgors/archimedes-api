@@ -1,5 +1,6 @@
 import { FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
+import { EntityNotFoundError } from 'typeorm';
 import { ZodError } from 'zod';
 import { AppError } from '../utils/ApplicationError';
 import { HttpException } from '../utils/HttpException';
@@ -11,6 +12,9 @@ const routesBuilder: FastifyPluginAsync<{ urlPrefix: string }> = async function 
   buildUserRoutes(fastify);
 
   fastify.setErrorHandler(async function (error: unknown, req, reply) {
+    if (error instanceof EntityNotFoundError) {
+      error = new HttpException(404, 'Not found');
+    }
     if (error instanceof AppError) {
       error = error.toHttpException();
     }
@@ -22,7 +26,6 @@ const routesBuilder: FastifyPluginAsync<{ urlPrefix: string }> = async function 
         error,
       });
     }
-    console.dir(error);
     return reply.code(500).send({
       error: {
         code: 500,

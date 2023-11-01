@@ -7,7 +7,7 @@ export class HttpException {
 export const HttpExceptionSchema = z.object({
   code: z.number(),
   message: z.string(),
-  details: z.record(z.any()),
+  details: z.record(z.any()).optional(),
 });
 
 export type HttpExceptionResponse = z.infer<typeof HttpExceptionSchema>;
