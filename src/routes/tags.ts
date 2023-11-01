@@ -1,48 +1,34 @@
-import { Tag } from '@prisma/client';
 import express from 'express';
-import { HttpException } from '../libs/HttpException';
-import { prisma } from '../prisma';
+import { getRepository } from '../db';
+import { Tag } from '../models/Tag';
+import { HttpException } from '../utils/HttpException';
 
 const router = express.Router();
 
-function renderTag(tag: Tag) {
-  return tag;
-}
-
 router.get('/', async function (req, res) {
-  const userId = req.context.user?.id || '';
-  const dbTags = await prisma.tag.findMany({
+  const userId = req.token?.sub || '';
+  const dbTags = await getRepository(Tag).find({
     where: {
       bookmarks: {
-        some: {
-          bookmark: {
-            lists: {
-              some: {
-                list: {
-                  permissions: {
-                    some: {
-                      userId,
-                    },
-                  },
-                },
-              },
-            },
+        lists: {
+          permissions: {
+            userId,
           },
         },
       },
     },
   });
-  res
+  return res
     .status(200)
     .json({
-      data: dbTags.map(renderTag),
+      data: dbTags,
     })
     .end();
 });
 
 router.get('/:id', async function (req, res, next) {
-  const userId = req.context.user?.id || '';
-  const dbTag = await prisma.tag.findUnique({
+  const userId = req.token?.sub || '';
+  const dbTag = await getRepository(Tag).findOne({
     where: {
       id: req.params.id,
     },
@@ -50,10 +36,10 @@ router.get('/:id', async function (req, res, next) {
   if (!dbTag) {
     return next(new HttpException(404, 'Not Found'));
   }
-  res
+  return res
     .status(200)
     .json({
-      data: renderTag(dbTag),
+      data: dbTag,
     })
     .end();
 });

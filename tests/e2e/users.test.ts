@@ -1,11 +1,15 @@
+import { Express } from 'express';
 import request from 'supertest';
-import { User, UserRole } from '../schemas/User';
-import app from '../server';
+import { UserRole } from '../../src/models/User';
+import { User } from '../../src/schemas/User';
+import { createServer } from '../../src/server';
 
 describe('/api/users', function () {
+  let app: Express | undefined;
   let ADMIN_TOKEN = '';
   let USER_TOKEN = '';
   beforeAll(async function () {
+    app = await createServer();
     await Promise.all([
       request(app)
         .post('/api/auth/sign')
@@ -16,6 +20,7 @@ describe('/api/users', function () {
         .set('Accept', 'application/json')
         .set('Content-Type', 'application/json')
         .then(function (response) {
+          expect(response.body).toHaveProperty('token');
           ADMIN_TOKEN = response.body.token;
         }),
       request(app)
@@ -27,6 +32,7 @@ describe('/api/users', function () {
         .set('Accept', 'application/json')
         .set('Content-Type', 'application/json')
         .then(function (response) {
+          expect(response.body).toHaveProperty('token');
           USER_TOKEN = response.body.token;
         }),
     ]);
@@ -508,9 +514,8 @@ describe('/api/users', function () {
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expect(deleteResponse.headers['content-type']).toMatch(/json/);
       expect(deleteResponse.status).toBe(200);
-      expectUser(deleteResponse.body, {
-        ...localUser,
-      });
+      expect(typeof deleteResponse.body).toBe('object');
+      expect(Object.keys(deleteResponse.body)).toHaveLength(0);
 
       const getResponse = await request(app)
         .get(`/api/users/${localUser?.id}`)

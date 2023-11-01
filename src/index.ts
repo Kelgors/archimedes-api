@@ -1,6 +1,9 @@
+import 'reflect-metadata';
 import { HOST, PORT } from './config';
-import app from './server';
+import { createServer } from './server';
 
-app.listen(PORT, HOST, function () {
-  console.log(`Listening on ${HOST}:${PORT}`);
+createServer().then(function (app) {
+  app.listen(PORT, HOST, function () {
+    console.log(`Listening on ${HOST}:${PORT}`);
+  });
 });
