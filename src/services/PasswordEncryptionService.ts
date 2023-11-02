@@ -9,6 +9,10 @@ class PasswordEncryptionService {
   async verifyPassword(encryptedPassword: string, plainPassword: string) {
     return argon2.verify(encryptedPassword, plainPassword + APP_SECRET);
   }
+
+  needsRehash(password: string): boolean {
+    return argon2.needsRehash(password);
+  }
 }
 
 export const passwordEncryptionService = new PasswordEncryptionService();

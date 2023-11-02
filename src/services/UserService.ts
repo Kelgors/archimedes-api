@@ -23,6 +23,12 @@ class UserService implements ICrudService<User, UserCreateInputBody, UserUpdateI
     });
   }
 
+  async findOneByEmail(email: string): Promise<User> {
+    return getRepository(User).findOneOrFail({
+      where: { email },
+    });
+  }
+
   async create(input: UserCreateInputBody): Promise<User> {
     try {
       return await getRepository(User).save({

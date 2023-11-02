@@ -4,14 +4,14 @@
       "id": "83efc0cc-5655-40a7-b1de-f3a39f95c440",
       "email": "admin@dev.me",
       "name": "Admin Dev",
-      "encryptedPassword": "$argon2id$v=19$m=65536,t=3,p=4$xO2j7wT/+tFQlpAx9ZZEow$+FMP9BjaS+TpyYXma/kM4FshEgsJkPI4u/0G3fI1WPw",
+      "encryptedPassword": "$argon2id$v=19$m=32768,t=2,p=2$N6V1sl04VjazUVBLif0JyA$rcmUFQmTDbAVL1Cig0QtJW7PszEXaqwAQdDFYAz1lzY",
       "role": "ADMIN"
     },
     {
       "id": "7b98f3e9-a1a4-4793-bd0c-941aade24003",
       "email": "user@dev.me",
       "name": "User Dev",
-      "encryptedPassword": "$argon2id$v=19$m=65536,t=3,p=4$xO2j7wT/+tFQlpAx9ZZEow$+FMP9BjaS+TpyYXma/kM4FshEgsJkPI4u/0G3fI1WPw",
+      "encryptedPassword": "$argon2id$v=19$m=32768,t=2,p=1$V8/6zcn2HdpLYr4F3JAp+g$6AJ8ojlyG4mZATUj6LNpENJaSKY9Z2ET39OGIUZOADs",
       "role": "USER"
     }
   ],
