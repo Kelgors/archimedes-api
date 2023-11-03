@@ -1,25 +1,27 @@
 import { EntityNotFoundError } from 'typeorm';
-import { User } from '../models/User';
-import { Token } from '../schemas/Auth';
+import { getRepository } from '../db';
+import { AuthRefreshToken } from '../models/AuthRefreshToken';
+import { User, UserRole } from '../models/User';
+import { AccessToken, RefreshToken } from '../schemas/Auth';
 import { AppError, AppErrorCode } from '../utils/ApplicationError';
 import { passwordEncryptionService } from './PasswordEncryptionService';
 import { userService } from './UserService';
 
 class AuthService {
-  async signIn(email: string, plainPassword: string): Promise<Token> {
+  async signIn(email: string, plainPassword: string): Promise<AccessToken> {
     let dbUser: User | undefined;
     try {
       dbUser = await userService.findOneByEmail(email);
     } catch (err) {
       if (err instanceof EntityNotFoundError) {
-        throw new AppError(AppErrorCode.WRONG_EMAIL_OR_PASSWORD, 'User with email/password pair not found');
+        throw new AppError(AppErrorCode.WRONG_EMAIL_OR_PASSWORD);
       }
       throw err;
     }
 
     const isPasswordCorrect = await passwordEncryptionService.verifyPassword(dbUser.encryptedPassword, plainPassword);
     if (!isPasswordCorrect) {
-      throw new AppError(AppErrorCode.WRONG_EMAIL_OR_PASSWORD, 'User with email/password pair not found');
+      throw new AppError(AppErrorCode.WRONG_EMAIL_OR_PASSWORD);
     }
 
     if (passwordEncryptionService.needsRehash(dbUser.encryptedPassword)) {
@@ -28,11 +30,36 @@ class AuthService {
       });
     }
 
+    return this.createAccessToken(dbUser.id, dbUser.role);
+  }
+
+  async refreshAccessToken(refreshToken: RefreshToken): Promise<AccessToken> {
+    const dbRefreshToken = await getRepository(AuthRefreshToken).findOneOrFail({
+      where: { id: refreshToken.jti, userId: refreshToken.sub },
+    });
+    const dbUser = await dbRefreshToken.user;
+    return this.createAccessToken(dbUser.id, dbUser.role);
+  }
+
+  private createAccessToken(sub: string, role: UserRole): AccessToken {
     return {
-      sub: dbUser.id,
-      role: dbUser.role,
-      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 /* 1 week */,
+      sub,
+      role,
+      exp: Math.floor(Date.now() / 1000) + 60 * 10 /* 10 minutes */,
     };
+  }
+
+  async createRefreshToken(userId: string): Promise<RefreshToken> {
+    const repo = getRepository(AuthRefreshToken);
+    return repo
+      .save(
+        repo.create({
+          userId,
+          createdAt: new Date(),
+          expireAt: new Date(Math.floor(Date.now()) + 1000 * 60 * 60 * 24 * 30) /* 30 days */,
+        }),
+      )
+      .then((dbRefreshToken) => dbRefreshToken.generateToken());
   }
 }
 

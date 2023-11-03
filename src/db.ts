@@ -1,5 +1,6 @@
 import { DataSource, EntityTarget, LogLevel, ObjectLiteral, Repository } from 'typeorm';
 import { DB_NAME, DB_SYNC } from './config';
+import { AuthRefreshToken } from './models/AuthRefreshToken';
 import { Bookmark } from './models/Bookmark';
 import { List } from './models/List';
 import { ListPermission } from './models/ListPermission';
@@ -18,7 +19,7 @@ export const AppDataSource = new DataSource({
   database: DB_NAME,
   synchronize: DB_SYNC,
   logging,
-  entities: [User, List, ListPermission, Tag, Bookmark],
+  entities: [User, List, ListPermission, Tag, Bookmark, AuthRefreshToken],
   subscribers: [],
   migrations: [],
 });

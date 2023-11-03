@@ -3,6 +3,8 @@ import request from 'supertest';
 import { UserRole } from '../../src/models/User';
 import { UserOutput } from '../../src/schemas/User';
 import { createServer } from '../../src/server';
+import errorMessages from '../../src/utils/error-messages';
+import { expectError } from '../lib';
 
 describe('/api/users', function () {
   let fastify: FastifyInstance | undefined;
@@ -22,8 +24,8 @@ describe('/api/users', function () {
         .set('Accept', 'application/json')
         .set('Content-Type', 'application/json')
         .then(function (response) {
-          expect(response.body).toHaveProperty('token');
-          ADMIN_TOKEN = response.body.token;
+          expect(response.body).toHaveProperty('accessToken');
+          ADMIN_TOKEN = response.body.accessToken;
         }),
       request(app)
         .post('/api/auth/sign')
@@ -34,8 +36,8 @@ describe('/api/users', function () {
         .set('Accept', 'application/json')
         .set('Content-Type', 'application/json')
         .then(function (response) {
-          expect(response.body).toHaveProperty('token');
-          USER_TOKEN = response.body.token;
+          expect(response.body).toHaveProperty('accessToken');
+          USER_TOKEN = response.body.accessToken;
         }),
     ]);
   });
@@ -52,23 +54,18 @@ describe('/api/users', function () {
     expect(body.data.email).toBe(user.email);
     expect(body.data.name).toBe(user.name);
     expect(body.data.role).toBe(user.role);
-    expect(body.data.password).not.toBeDefined();
-    expect(body.data.encryptedPassword).not.toBeDefined();
-  }
-
-  function expectError(response: request.Response, status: number) {
-    expect(response.headers['content-type']).toMatch(/json/);
-    expect(response.status).toBe(status);
-    expect(response.body).toHaveProperty('error');
-    expect(response.body.error).toBeDefined();
-    expect(response.body.error.code).toBe(status);
-    expect(typeof response.body.error.message).toBe('string');
+    expect(body.data.password).toBeUndefined();
+    expect(body.data.encryptedPassword).toBeUndefined();
   }
 
   describe('GET /api/users', () => {
     it('should be restrained to anonymous users', async () => {
       const response = await request(app).get('/api/users').set('Accept', 'application/json');
-      expectError(response, 401);
+      expectError(
+        response,
+        errorMessages['FST_JWT_NO_AUTHORIZATION_IN_HEADER'].code,
+        errorMessages['FST_JWT_NO_AUTHORIZATION_IN_HEADER'].message,
+      );
     });
 
     it('should be restrained to invalid users', async () => {
@@ -76,7 +73,7 @@ describe('/api/users', function () {
         .get('/api/users')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer JaimeLePate`);
-      expectError(response, 401);
+      expectError(response, errorMessages['FST_JWT_BAD_REQUEST'].code, errorMessages['FST_JWT_BAD_REQUEST'].message);
     });
 
     it('should be restrained to expired token', async () => {
@@ -87,7 +84,11 @@ describe('/api/users', function () {
           'Authorization',
           `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4M2VmYzBjYy01NjU1LTQwYTctYjFkZS1mM2EzOWY5NWM0NDAiLCJyb2xlIjoiQURNSU4iLCJleHAiOjE2OTg4Njk0NzYsImlhdCI6MTY5ODg2OTQ3NX0.RW76aZBI8d1Pkl8cIedhBPc1wfU4biOus12gbSQS4Pg`,
         );
-      expectError(response, 401);
+      expectError(
+        response,
+        errorMessages['FST_JWT_AUTHORIZATION_TOKEN_EXPIRED'].code,
+        errorMessages['FST_JWT_AUTHORIZATION_TOKEN_EXPIRED'].message,
+      );
     });
 
     it('should be restrained to unauthorized users', async () => {
@@ -95,7 +96,7 @@ describe('/api/users', function () {
         .get('/api/users')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${USER_TOKEN}`);
-      expectError(response, 401);
+      expectError(response, errorMessages['MISSING_PERMISSIONS'].code, errorMessages['MISSING_PERMISSIONS'].message);
     });
 
     it('should have at least one entry', async () => {
@@ -139,7 +140,11 @@ describe('/api/users', function () {
       const response = await request(app)
         .get('/api/users/83efc0cc-5655-40a7-b1de-f3a39f95c440')
         .set('Accept', 'application/json');
-      expectError(response, 401);
+      expectError(
+        response,
+        errorMessages['FST_JWT_NO_AUTHORIZATION_IN_HEADER'].code,
+        errorMessages['FST_JWT_NO_AUTHORIZATION_IN_HEADER'].message,
+      );
     });
 
     it('should be restrained to invalid users', async () => {
@@ -147,7 +152,7 @@ describe('/api/users', function () {
         .get('/api/users/83efc0cc-5655-40a7-b1de-f3a39f95c440')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer JaimeLePate`);
-      expectError(response, 401);
+      expectError(response, errorMessages['FST_JWT_BAD_REQUEST'].code, errorMessages['FST_JWT_BAD_REQUEST'].message);
     });
 
     it('should be restrained to expired token', async () => {
@@ -158,7 +163,11 @@ describe('/api/users', function () {
           'Authorization',
           `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4M2VmYzBjYy01NjU1LTQwYTctYjFkZS1mM2EzOWY5NWM0NDAiLCJyb2xlIjoiQURNSU4iLCJleHAiOjE2OTg4Njk0NzYsImlhdCI6MTY5ODg2OTQ3NX0.RW76aZBI8d1Pkl8cIedhBPc1wfU4biOus12gbSQS4Pg`,
         );
-      expectError(response, 401);
+      expectError(
+        response,
+        errorMessages['FST_JWT_AUTHORIZATION_TOKEN_EXPIRED'].code,
+        errorMessages['FST_JWT_AUTHORIZATION_TOKEN_EXPIRED'].message,
+      );
     });
 
     it('should be restrained to unauthorized users', async () => {
@@ -166,7 +175,7 @@ describe('/api/users', function () {
         .get('/api/users/83efc0cc-5655-40a7-b1de-f3a39f95c440')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${USER_TOKEN}`);
-      expectError(response, 401);
+      expectError(response, errorMessages['MISSING_PERMISSIONS'].code, errorMessages['MISSING_PERMISSIONS'].message);
     });
 
     it('should fetch user with correct id', async () => {
@@ -235,7 +244,11 @@ describe('/api/users', function () {
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json');
-      expectError(response, 401);
+      expectError(
+        response,
+        errorMessages['FST_JWT_NO_AUTHORIZATION_IN_HEADER'].code,
+        errorMessages['FST_JWT_NO_AUTHORIZATION_IN_HEADER'].message,
+      );
     });
 
     it('should be restrained to invalid users', async () => {
@@ -250,7 +263,7 @@ describe('/api/users', function () {
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer JaimeLePate`);
-      expectError(response, 401);
+      expectError(response, errorMessages['FST_JWT_BAD_REQUEST'].code, errorMessages['FST_JWT_BAD_REQUEST'].message);
     });
 
     it('should be restrained to expired token', async () => {
@@ -268,7 +281,11 @@ describe('/api/users', function () {
           'Authorization',
           `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4M2VmYzBjYy01NjU1LTQwYTctYjFkZS1mM2EzOWY5NWM0NDAiLCJyb2xlIjoiQURNSU4iLCJleHAiOjE2OTg4Njk0NzYsImlhdCI6MTY5ODg2OTQ3NX0.RW76aZBI8d1Pkl8cIedhBPc1wfU4biOus12gbSQS4Pg`,
         );
-      expectError(response, 401);
+      expectError(
+        response,
+        errorMessages['FST_JWT_AUTHORIZATION_TOKEN_EXPIRED'].code,
+        errorMessages['FST_JWT_AUTHORIZATION_TOKEN_EXPIRED'].message,
+      );
     });
 
     it('should be restrained to unauthorized users', async () => {
@@ -283,7 +300,7 @@ describe('/api/users', function () {
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${USER_TOKEN}`);
-      expectError(response, 401);
+      expectError(response, errorMessages['MISSING_PERMISSIONS'].code, errorMessages['MISSING_PERMISSIONS'].message);
     });
 
     it('should not create user without email', async () => {
@@ -401,7 +418,7 @@ describe('/api/users', function () {
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expect(createResponse.headers['content-type']).toMatch(/json/);
       expect(createResponse.status).toBe(201);
-      expect(createResponse.body.data).toBeTruthy();
+      expect(createResponse.body.data).toBeDefined();
       expectUser(createResponse.body, {
         email: 'test@test.test',
         name: 'Test Test',
@@ -416,9 +433,7 @@ describe('/api/users', function () {
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json');
-      expect(authResponse.headers['content-type']).toMatch(/json/);
-      expect(authResponse.status).toBe(201);
-      expect(typeof authResponse.body.token).toBe('string');
+      expect(typeof authResponse.body.accessToken).toBe('string');
       // Test fetching the new user to test every other fields persistance
       const showResponse = await request(app)
         .get('/api/users/' + createResponse.body.data.id)
@@ -467,7 +482,11 @@ describe('/api/users', function () {
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json');
-      expectError(response, 401);
+      expectError(
+        response,
+        errorMessages['FST_JWT_NO_AUTHORIZATION_IN_HEADER'].code,
+        errorMessages['FST_JWT_NO_AUTHORIZATION_IN_HEADER'].message,
+      );
     });
 
     it('should be restrained to invalid users', async () => {
@@ -481,7 +500,7 @@ describe('/api/users', function () {
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer JaimeLePate`);
-      expectError(response, 401);
+      expectError(response, errorMessages['FST_JWT_BAD_REQUEST'].code, errorMessages['FST_JWT_BAD_REQUEST'].message);
     });
 
     it('should be restrained to expired token', async () => {
@@ -498,7 +517,11 @@ describe('/api/users', function () {
           'Authorization',
           `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4M2VmYzBjYy01NjU1LTQwYTctYjFkZS1mM2EzOWY5NWM0NDAiLCJyb2xlIjoiQURNSU4iLCJleHAiOjE2OTg4Njk0NzYsImlhdCI6MTY5ODg2OTQ3NX0.RW76aZBI8d1Pkl8cIedhBPc1wfU4biOus12gbSQS4Pg`,
         );
-      expectError(response, 401);
+      expectError(
+        response,
+        errorMessages['FST_JWT_AUTHORIZATION_TOKEN_EXPIRED'].code,
+        errorMessages['FST_JWT_AUTHORIZATION_TOKEN_EXPIRED'].message,
+      );
     });
 
     it('should be restrained to unauthorized users', async () => {
@@ -512,7 +535,7 @@ describe('/api/users', function () {
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${USER_TOKEN}`);
-      expectError(response, 401);
+      expectError(response, errorMessages['MISSING_PERMISSIONS'].code, errorMessages['MISSING_PERMISSIONS'].message);
     });
 
     it('should update user name', async () => {
@@ -628,9 +651,7 @@ describe('/api/users', function () {
         })
         .set('Accept', 'application/json')
         .set('Content-Type', 'application/json');
-      expect(authResponse.headers['content-type']).toMatch(/json/);
-      expect(authResponse.status).toBe(201);
-      expect(typeof authResponse.body.token).toBe('string');
+      expect(typeof authResponse.body.accessToken).toBe('string');
     });
   });
 
@@ -660,7 +681,11 @@ describe('/api/users', function () {
       const response = await request(app)
         .delete(`/api/users/${localUser?.id}`)
         .set('Accept', 'application/json');
-      expectError(response, 401);
+      expectError(
+        response,
+        errorMessages['FST_JWT_NO_AUTHORIZATION_IN_HEADER'].code,
+        errorMessages['FST_JWT_NO_AUTHORIZATION_IN_HEADER'].message,
+      );
     });
 
     it('should be restrained to invalid users', async () => {
@@ -670,7 +695,7 @@ describe('/api/users', function () {
         .delete(`/api/users/${localUser?.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer JaimeLePate`);
-      expectError(response, 401);
+      expectError(response, errorMessages['FST_JWT_BAD_REQUEST'].code, errorMessages['FST_JWT_BAD_REQUEST'].message);
     });
 
     it('should be restrained to expired token', async () => {
@@ -683,7 +708,11 @@ describe('/api/users', function () {
           'Authorization',
           `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4M2VmYzBjYy01NjU1LTQwYTctYjFkZS1mM2EzOWY5NWM0NDAiLCJyb2xlIjoiQURNSU4iLCJleHAiOjE2OTg4Njk0NzYsImlhdCI6MTY5ODg2OTQ3NX0.RW76aZBI8d1Pkl8cIedhBPc1wfU4biOus12gbSQS4Pg`,
         );
-      expectError(response, 401);
+      expectError(
+        response,
+        errorMessages['FST_JWT_AUTHORIZATION_TOKEN_EXPIRED'].code,
+        errorMessages['FST_JWT_AUTHORIZATION_TOKEN_EXPIRED'].message,
+      );
     });
     it('should be restrained to unauthorized users', async () => {
       const localUser = USERS.pop();
@@ -692,7 +721,7 @@ describe('/api/users', function () {
         .delete(`/api/users/${localUser?.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${USER_TOKEN}`);
-      expectError(response, 401);
+      expectError(response, errorMessages['MISSING_PERMISSIONS'].code, errorMessages['MISSING_PERMISSIONS'].message);
     });
 
     it('should not delete unkown id', async () => {

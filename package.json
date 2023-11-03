@@ -14,7 +14,7 @@
     "db:reset": "rm -f $DB_NAME && npm run db:seed",
     "db:reset:dev": "dotenv -e .env.development -- npm run db:reset",
     "db:reset:test": "dotenv -e .env.test -- npm run db:reset",
-    "test": "npm run db:reset:test && nyc jest"
+    "test": "npm run db:reset:test && jest --runInBand --coverage"
   },
   "author": {
     "name": "Matthieu BOHEAS",
@@ -28,7 +28,6 @@
     "@types/node": "^20.8.9",
     "@types/supertest": "^2.0.15",
     "nodemon": "^3.0.1",
-    "nyc": "^15.1.0",
     "pino-pretty": "^10.2.3",
     "prettier": "^3.0.3",
     "supertest": "^6.3.3",
@@ -42,6 +41,7 @@
     "dotenv": "^16.3.1",
     "dotenv-cli": "^7.3.0",
     "express-jwt": "^8.4.1",
+    "fast-jwt": "^3.3.1",
     "fastify": "^4.24.3",
     "fastify-plugin": "^4.5.1",
     "fastify-type-provider-zod": "^1.1.9",
