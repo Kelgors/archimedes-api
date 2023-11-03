@@ -53,12 +53,12 @@ jobs:
           labels: |
             maintainer=kelgors
           images: |
-            name=${{secrets.DOCKER_IMAGE}},enable=${{env.GITHUB_REF_TYPE == 'tag' || github.ref == format('refs/heads/{0}', 'main')}}
+            name=${{secrets.DOCKER_IMAGE}}
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+            type=raw,value=latest
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -69,6 +69,6 @@ jobs:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
