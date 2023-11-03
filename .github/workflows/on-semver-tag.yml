@@ -9,14 +9,14 @@ jobs:
         node: [20]
     name: Tests with NodeJS v${{ matrix.node }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
           cache: 'npm'
-
-      - name: Checkout
-        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: npm ci
