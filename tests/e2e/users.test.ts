@@ -408,7 +408,7 @@ describe('/api/users', function () {
       const createResponse = await request(app)
         .post('/api/users')
         .send({
-          email: 'test@test.test',
+          email: 'test-create+success@test.test',
           name: 'Test Test',
           role: UserRole.USER,
           password: 'changemeplease2',
@@ -420,7 +420,7 @@ describe('/api/users', function () {
       expect(createResponse.status).toBe(201);
       expect(createResponse.body.data).toBeDefined();
       expectUser(createResponse.body, {
-        email: 'test@test.test',
+        email: 'test-create+success@test.test',
         name: 'Test Test',
         role: UserRole.USER,
       });
@@ -428,7 +428,7 @@ describe('/api/users', function () {
       const authResponse = await request(app)
         .post('/api/auth/sign')
         .send({
-          email: 'test@test.test',
+          email: 'test-create+success@test.test',
           password: 'changemeplease2',
         })
         .set('Content-Type', 'application/json')
@@ -454,9 +454,9 @@ describe('/api/users', function () {
   describe('PATCH /api/users', () => {
     const USERS: UserOutput[] = [];
     let index = 0;
-    beforeEach(function () {
+    beforeEach(async function () {
       const position = index++;
-      return request(app)
+      const response = await request(app)
         .post('/api/users')
         .send({
           email: `patching+${position}@test.test`,
@@ -466,10 +466,8 @@ describe('/api/users', function () {
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${ADMIN_TOKEN}`)
-        .then(function (response) {
-          USERS.push(response.body.data);
-        });
+        .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
+      USERS.push(response.body.data);
     });
 
     it('should be restrained to anonymous users', async () => {
@@ -658,9 +656,9 @@ describe('/api/users', function () {
   describe('DELETE /api/users/:id', function () {
     const USERS: UserOutput[] = [];
     let index = 0;
-    beforeEach(function () {
+    beforeEach(async function () {
       const position = index++;
-      return request(app)
+      const response = await request(app)
         .post('/api/users')
         .send({
           email: `deleting+${position}@test.test`,
@@ -670,10 +668,8 @@ describe('/api/users', function () {
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${ADMIN_TOKEN}`)
-        .then(function (response) {
-          USERS.push(response.body.data);
-        });
+        .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
+      USERS.push(response.body.data);
     });
     it('should be restrained to anonymous users', async () => {
       const localUser = USERS.pop();
