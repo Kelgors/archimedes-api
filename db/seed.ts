@@ -38,7 +38,10 @@ async function main() {
 
   for (let index = 0; index < data.bookmarks.length; index++) {
     console.log('+ Bookmark(title: %s)', data.bookmarks[index].title);
-    await AppDataSource.getRepository(Bookmark).insert(data.bookmarks[index]);
+    const dbUser = AppDataSource.getRepository(Bookmark).create({
+      ...data.bookmarks[index],
+    });
+    await AppDataSource.getRepository(Bookmark).save(dbUser);
   }
 
   console.log(`Seeding finished.`);
