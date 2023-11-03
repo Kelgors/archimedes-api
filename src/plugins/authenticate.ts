@@ -19,7 +19,7 @@ const setupJwtTokenAuth: FastifyPluginAsync<never> = async function (fastify) {
     secret: JWT_SECRET,
   });
 
-  fastify.decorate('authenticate', async function (req, reply) {
+  fastify.decorate('authenticate', async function (req, _reply) {
     await req.jwtVerify();
     req.token = await AccessTokenSchema.parseAsync(req.user);
   });

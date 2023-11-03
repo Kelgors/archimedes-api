@@ -1,11 +1,11 @@
 import {
-  RawReplyDefaultExpression,
-  RawRequestDefaultExpression,
-  RawServerDefault,
-  RouteGenericInterface,
-  preHandlerAsyncHookHandler,
+  type RawReplyDefaultExpression,
+  type RawRequestDefaultExpression,
+  type RawServerDefault,
+  type RouteGenericInterface,
+  type preHandlerAsyncHookHandler,
 } from 'fastify';
-import { ZodTypeProvider } from 'fastify-type-provider-zod';
+import { type ZodTypeProvider } from 'fastify-type-provider-zod';
 
 export type AppPreHandlerAsyncHookHandler = preHandlerAsyncHookHandler<
   RawServerDefault,

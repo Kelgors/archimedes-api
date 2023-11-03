@@ -8,7 +8,7 @@ import ErrorMessagesMap from '../utils/error-messages';
 import buildAuthRoutes from './auth';
 import buildUserRoutes from './users';
 
-const routesBuilder: FastifyPluginAsync<{}> = async function (fastify) {
+const routesBuilder: FastifyPluginAsync<never> = async function (fastify) {
   buildAuthRoutes(fastify);
   buildUserRoutes(fastify);
 
