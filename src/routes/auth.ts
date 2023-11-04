@@ -34,7 +34,7 @@ const buildAuthRoutes = function (fastify: FastifyInstance) {
 
   fastifyZod.route({
     method: 'POST',
-    url: '/api/auth/refresh',
+    url: '/api/auth/renew',
     schema: {
       body: AuthRefreshInputBodySchema,
       response: {
@@ -45,7 +45,7 @@ const buildAuthRoutes = function (fastify: FastifyInstance) {
     },
     handler: async function (req, reply) {
       const rawToken = fastify.jwt.verify<RefreshToken>(req.body.refreshToken);
-      const accessToken = await authService.refreshAccessToken(rawToken);
+      const accessToken = await authService.renewAccessToken(rawToken);
       return reply.code(201).send({
         accessToken: fastify.jwt.sign(accessToken, {
           algorithm: 'HS256',

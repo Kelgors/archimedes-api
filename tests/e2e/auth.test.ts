@@ -77,7 +77,7 @@ describe('/api/auth', function () {
     });
   });
 
-  describe('POST /api/auth/refresh', () => {
+  describe('POST /api/auth/renew', () => {
     it('should successfuly refresh token', async () => {
       const response = await request(app)
         .post('/api/auth/sign')
@@ -104,7 +104,7 @@ describe('/api/auth', function () {
       await new Promise((r) => setTimeout(r, 1000));
 
       const refreshResponse = await request(app)
-        .post('/api/auth/refresh')
+        .post('/api/auth/renew')
         .send({
           refreshToken: response.body.refreshToken,
         })
@@ -117,7 +117,7 @@ describe('/api/auth', function () {
 
     it('should be restrained to anonymous users', async () => {
       const response = await request(app)
-        .post('/api/auth/refresh')
+        .post('/api/auth/renew')
         .set('Accept', 'application/json')
         .set('Content-Type', 'application/json')
         .send({});
@@ -133,7 +133,7 @@ describe('/api/auth', function () {
 
     it('should be restrained to invalid token', async () => {
       const response = await request(app)
-        .post('/api/auth/refresh')
+        .post('/api/auth/renew')
         .set('Accept', 'application/json')
         .set('Content-Type', 'application/json')
         .send({
@@ -149,7 +149,7 @@ describe('/api/auth', function () {
 
     it('should be restrained to expired token', async () => {
       const response = await request(app)
-        .post('/api/auth/refresh')
+        .post('/api/auth/renew')
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .send({

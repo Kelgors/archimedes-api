@@ -33,7 +33,7 @@ class AuthService {
     return this.createAccessToken(dbUser.id, dbUser.role);
   }
 
-  async refreshAccessToken(refreshToken: RefreshToken): Promise<AccessToken> {
+  async renewAccessToken(refreshToken: RefreshToken): Promise<AccessToken> {
     const dbRefreshToken = await getRepository(AuthRefreshToken).findOneOrFail({
       where: { id: refreshToken.jti, userId: refreshToken.sub },
     });
