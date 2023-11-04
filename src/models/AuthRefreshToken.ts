@@ -12,7 +12,7 @@ export class AuthRefreshToken {
   @Column()
   expireAt: Date;
 
-  @ManyToOne(() => User, (user) => user.permissions)
+  @ManyToOne(() => User, (user) => user.refreshTokens)
   @JoinColumn()
   user: Promise<User>;
 
