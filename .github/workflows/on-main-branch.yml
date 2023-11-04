@@ -28,7 +28,7 @@ jobs:
               DB_NAME: bookmarks
           - id: mysql
             start: 'sudo systemctl start mysql.service'
-            create_db: 'mysql -u root -p=root -e "create database bookmarks"'
+            create_db: 'sudo mysql -u root -p=root -e "create database bookmarks"'
             env:
               DB_TYPE: mariadb
               DB_HOST: localhost
