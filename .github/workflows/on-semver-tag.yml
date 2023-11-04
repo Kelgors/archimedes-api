@@ -56,10 +56,10 @@ jobs:
           images: |
             name=${{secrets.DOCKER_IMAGE}}
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=raw,value=latest
+            type=semver,pattern={{version}}-slim
+            type=semver,pattern={{major}}.{{minor}}-slim
+            type=semver,pattern={{major}}-slim
+            type=raw,value=slim
 
       - name: Checkout
         uses: actions/checkout@v4
