@@ -1,6 +1,6 @@
 import type { FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
-import { EntityNotFoundError } from 'typeorm';
+import { EntityNotFoundError, QueryFailedError } from 'typeorm';
 import { ZodError } from 'zod';
 import { NODE_ENV } from '../config';
 import { HttpException } from '../utils/HttpException';
@@ -32,17 +32,23 @@ const routesBuilder: FastifyPluginAsync<never> = async function (fastify) {
     }
     if (error instanceof EntityNotFoundError) {
       error = new HttpException(404, 'Not found');
+    } else if (error instanceof QueryFailedError) {
+      error = new HttpException(422, error.message, error);
     } else if (error instanceof ZodError) {
       error = new HttpException(400, 'Invalid format', error.issues);
     } else if ('code' in error && typeof error.code === 'string' && error.code in ErrorMessagesMap) {
-      error = ErrorMessagesMap[error.code];
+      error = ErrorMessagesMap[error.code](error);
     }
     if (error instanceof HttpException) {
       return reply.code(error.code).send({
-        error,
+        error: {
+          code: error.code,
+          message: error.message,
+          details: NODE_ENV !== 'production' ? error.details : undefined,
+        },
       });
     }
-    if (NODE_ENV === 'development') req.log.error(error);
+    if (NODE_ENV === 'development' || NODE_ENV === 'test') console.dir(error);
     return reply.code(500).send({
       error: {
         code: 500,

@@ -6,11 +6,59 @@ on:
     branches: [main]
 jobs:
   tests:
+    name: Tests with NodeJS v${{ matrix.node }} with ${{ matrix.db.id }}
     runs-on: ubuntu-latest
+    env:
+      PORT: 3000
+      NODE_ENV: test
+      JWT_SECRET: b01f741e726e4117
+      APP_SECRET: b683f9abb8e7485c
+      LOG_TARGET: none
     strategy:
       matrix:
+        db:
+          - id: postgres
+            services:
+              db:
+                image: postgres
+                env:
+                  POSTGRES_PASSWORD: postgres
+                ports:
+                  - 54320:5432
+                options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+            env:
+              DB_TYPE: postgres
+              DB_HOST: localhost
+              DB_PORT: 54320
+              DB_USER: postgres
+              DB_PASS: postgres
+              DB_NAME: postgres
+          - id: mysql
+            services:
+              db:
+                image: mysql
+                env:
+                  MYSQL_USER: user
+                  MYSQL_PASSWORD: password
+                  MYSQL_DATABASE: bookmarks
+                  MYSQL_ROOT_PASSWORD: root
+                ports:
+                  - 33060:3306
+                options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+            env:
+              DB_TYPE: mysql
+              DB_HOST: localhost
+              DB_PORT: 33060
+              DB_USER: user
+              DB_PASS: password
+              DB_NAME: bookmarks
+          - id: sqlite
+            env:
+              DB_TYPE: sqlite
+              DB_NAME: db/test.db
+            services: {}
         node: [20]
-    name: Tests with NodeJS v${{ matrix.node }}
+    services: ${{ matrix.db.services }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,12 +71,19 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        env:
+          NODE_ENV: development
 
       - name: Linting
         run: npm run lint --max-warnings=0
+        env:
+          NODE_ENV: development
 
       - name: Build
         run: npm run build
+        env:
+          NODE_ENV: production
 
       - name: Test
         run: npm test
+        env: ${{ matrix.db.env }}

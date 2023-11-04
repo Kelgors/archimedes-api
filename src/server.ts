@@ -1,18 +1,19 @@
 import Fastify from 'fastify';
 
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
-import { NODE_ENV } from './config';
-import { AppDataSource } from './db';
-import loggingByEnv from './logging';
+import { appDataSource } from './db';
+import loggerConfig from './logging';
 import setupJwtTokenAuth from './plugins/authenticate';
 import apiV1 from './routes';
 
 export async function createServer() {
-  await AppDataSource.initialize();
-
   const fastify = Fastify({
-    logger: loggingByEnv[NODE_ENV] ?? true,
+    logger: loggerConfig,
   });
+
+  fastify.log.info(`Starting connection to ${appDataSource.options.type}`);
+  await appDataSource.initialize();
+  fastify.addHook('onClose', () => appDataSource.destroy());
 
   // Add schema validator and serializer
   fastify.setValidatorCompiler(validatorCompiler);
