@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Bookmark } from './Bookmark';
 import { ListPermission } from './ListPermission';
+import { ListVisibility } from './ListVisibility';
 import { User } from './User';
 
 @Entity()
@@ -14,8 +15,8 @@ export class List {
   @Column({ type: String, nullable: true })
   description: string | null;
 
-  @Column({ default: false })
-  isPublic: boolean;
+  @Column(() => ListVisibility)
+  visibility: ListVisibility;
 
   @ManyToOne(() => User, (user) => user.lists, {
     onUpdate: 'CASCADE',

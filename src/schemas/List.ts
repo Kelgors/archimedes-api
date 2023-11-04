@@ -1,24 +1,37 @@
 import { z } from 'zod';
+
+import { Visibility } from '../models/ListVisibility';
 import { USER_ID } from './User';
 
-export const LIST_ID = z.string().uuid();
-const LIST_NAME = z.string().max(32);
-const LIST_DESCRIPTION = z.string().optional();
-const LIST_PUBLIC = z.boolean().optional();
+const VISIBILITY = z.nativeEnum(Visibility);
 
-export const ListCreateInputSchema = z.object({
-  name: LIST_NAME,
-  description: LIST_DESCRIPTION,
+export const LIST_ID = z.string().uuid();
+const LIST_NAME = z.string().min(1).max(32);
+const LIST_DESCRIPTION = z.string().nullable().optional();
+const LIST_VISIBILITY = z.object({
+  anonymous: VISIBILITY,
+  instance: VISIBILITY,
 });
 
-export const ListUpdateInputSchema = ListCreateInputSchema.optional();
+export const ListCreateInputBodySchema = z.object({
+  name: LIST_NAME,
+  description: LIST_DESCRIPTION,
+  visibility: LIST_VISIBILITY,
+  ownerId: USER_ID.optional(),
+});
 
-export const ListSchema = z.object({
+export const ListUpdateInputBodySchema = ListCreateInputBodySchema.optional();
+
+export const ListOutputSchema = z.object({
   id: LIST_ID,
   name: LIST_NAME,
   description: LIST_DESCRIPTION,
-  isPublic: LIST_PUBLIC,
+  visibility: LIST_VISIBILITY,
   ownerId: USER_ID,
 });
+export const DeleteListOutputSchema = ListOutputSchema.merge(z.object({ id: LIST_ID.optional() }));
 
-export type List = z.infer<typeof ListSchema>;
+export type ListCreateInputBody = z.infer<typeof ListCreateInputBodySchema>;
+export type ListUpdateInputBody = z.infer<typeof ListUpdateInputBodySchema>;
+export type ListOutput = z.infer<typeof ListOutputSchema>;
+export type DeleteListOutput = z.infer<typeof DeleteListOutputSchema>;
