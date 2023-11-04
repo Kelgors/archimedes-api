@@ -15,5 +15,13 @@ if (!APP_SECRET) {
   throw new Error('Missing APP_SECRET');
 }
 
+export const DB_TYPE = process.env.DB_TYPE || '';
+export const DB_HOST = process.env.DB_HOST || '';
+export const DB_PORT = parseInt(process.env.DB_PORT || '', 10) || 0;
+export const DB_USER = process.env.DB_USER || '';
+export const DB_PASS = process.env.DB_PASS || '';
 export const DB_NAME = process.env.DB_NAME || '';
 export const DB_SYNC = process.env.DB_SYNC === 'true';
+
+export const LOG_TARGET = process.env.LOG_TARGET || '';
+export const LOG_PATH = process.env.LOG_PATH || null;

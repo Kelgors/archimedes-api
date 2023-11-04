@@ -1,5 +1,5 @@
 import fastJwt from 'fast-jwt';
-import { FastifyInstance, RawServerDefault } from 'fastify';
+import type { FastifyInstance, RawServerDefault } from 'fastify';
 import request from 'supertest';
 import { JWT_SECRET } from '../../src/config';
 import { createServer } from '../../src/server';
@@ -55,8 +55,8 @@ describe('/api/auth', function () {
         .set('Content-Type', 'application/json');
       expectError(
         response,
-        errorMessages['WRONG_EMAIL_OR_PASSWORD'].code,
-        errorMessages['WRONG_EMAIL_OR_PASSWORD'].message,
+        errorMessages['WRONG_EMAIL_OR_PASSWORD']().code,
+        errorMessages['WRONG_EMAIL_OR_PASSWORD']().message,
       );
     });
 
@@ -71,8 +71,8 @@ describe('/api/auth', function () {
         .set('Content-Type', 'application/json');
       expectError(
         response,
-        errorMessages['WRONG_EMAIL_OR_PASSWORD'].code,
-        errorMessages['WRONG_EMAIL_OR_PASSWORD'].message,
+        errorMessages['WRONG_EMAIL_OR_PASSWORD']().code,
+        errorMessages['WRONG_EMAIL_OR_PASSWORD']().message,
       );
     });
   });
@@ -142,8 +142,8 @@ describe('/api/auth', function () {
         });
       expectError(
         response,
-        errorMessages['FAST_JWT_INVALID_SIGNATURE'].code,
-        errorMessages['FAST_JWT_INVALID_SIGNATURE'].message,
+        errorMessages['FAST_JWT_INVALID_SIGNATURE']().code,
+        errorMessages['FAST_JWT_INVALID_SIGNATURE']().message,
       );
     });
 
@@ -156,7 +156,7 @@ describe('/api/auth', function () {
           refreshToken:
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4M2VmYzBjYy01NjU1LTQwYTctYjFkZS1mM2EzOWY5NWM0NDAiLCJqdGkiOiI1ODI3ZWE3ZC00ZTlmLTQ4ZWEtOTEzNS05YmZjYjZkNzM2MzYiLCJleHAiOjE2OTg4Njk0NzYsImlhdCI6MTY5ODg2OTQ3NX0.TME2KFTB1NhqqjyOnblVQdbe9pHtkLyVopUJ94bKak4',
         });
-      expectError(response, errorMessages['FAST_JWT_EXPIRED'].code, errorMessages['FAST_JWT_EXPIRED'].message);
+      expectError(response, errorMessages['FAST_JWT_EXPIRED']().code, errorMessages['FAST_JWT_EXPIRED']().message);
     });
   });
 });

@@ -4,7 +4,7 @@ import type { FindAllOptions, ICrudService } from '../@types/ICrudService';
 import { getRepository } from '../db';
 import { User } from '../models/User';
 import type { UserCreateInputBody, UserUpdateInputBody } from '../schemas/User';
-import { HttpException } from '../utils/HttpException';
+import { throwParsedQueryFailedError } from '../utils/parse-sql-error';
 import { passwordEncryptionService } from './PasswordEncryptionService';
 
 class UserService implements ICrudService<User, UserCreateInputBody, UserUpdateInputBody> {
@@ -39,9 +39,7 @@ class UserService implements ICrudService<User, UserCreateInputBody, UserUpdateI
       });
     } catch (err) {
       if (err instanceof QueryFailedError) {
-        if (err.message.includes('UNIQUE constraint failed: user.email')) {
-          throw new HttpException(400, 'email already exists');
-        }
+        throwParsedQueryFailedError(err);
       }
       throw err;
     }
@@ -59,9 +57,7 @@ class UserService implements ICrudService<User, UserCreateInputBody, UserUpdateI
       return await getRepository(User).save(dbPayload);
     } catch (err) {
       if (err instanceof QueryFailedError) {
-        if (err.message.includes('UNIQUE constraint failed: user.email')) {
-          throw new HttpException(400, 'email already exists');
-        }
+        throwParsedQueryFailedError(err);
       }
       throw err;
     }
