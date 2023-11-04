@@ -16,6 +16,6 @@ export const ApiTagSchema = z.object({
   name: TAG_NAME,
 });
 
-export type Tag = z.infer<typeof ApiTagSchema>;
+export type TagOutput = z.infer<typeof ApiTagSchema>;
 export type TagCreateInput = z.infer<typeof TagCreateInputSchema>;
 export type TagUpdateInput = z.infer<typeof TagUpdateInputSchema>;

@@ -6,11 +6,13 @@ import { NODE_ENV } from '../config';
 import { HttpException } from '../utils/HttpException';
 import ErrorMessagesMap from '../utils/error-messages';
 import buildAuthRoutes from './auth';
+import buildTagRoutes from './tags';
 import buildUserRoutes from './users';
 
 const routesBuilder: FastifyPluginAsync<never> = async function (fastify) {
   buildAuthRoutes(fastify);
   buildUserRoutes(fastify);
+  buildTagRoutes(fastify);
 
   fastify.all('/api/*', function (req, reply) {
     reply.code(404).send({

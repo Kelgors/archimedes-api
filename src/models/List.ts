@@ -30,6 +30,9 @@ export class List {
   @OneToMany(() => ListPermission, (permission) => permission.list)
   permissions: Promise<ListPermission[]>;
 
-  @ManyToMany(() => Bookmark, (bookmark) => bookmark.lists)
+  @ManyToMany(() => Bookmark, (bookmark) => bookmark.lists, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   bookmarks: Promise<Bookmark[]>;
 }

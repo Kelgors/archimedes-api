@@ -1,12 +1,12 @@
 import type { FastifyInstance, RawServerDefault } from 'fastify';
+import slugify from 'slugify';
 import request from 'supertest';
-import { UserRole } from '../../src/models/User';
-import type { UserOutput } from '../../src/schemas/User';
+import type { TagOutput } from '../../src/schemas/Tag';
 import { createServer } from '../../src/server';
 import errorMessages from '../../src/utils/error-messages';
 import { expectError } from '../lib';
 
-describe('/api/users', function () {
+describe('/api/tags', function () {
   let fastify: FastifyInstance | undefined;
   let app: RawServerDefault | undefined;
   let ADMIN_TOKEN = '';
@@ -43,24 +43,24 @@ describe('/api/users', function () {
   });
   afterAll(() => fastify?.close());
 
-  function expectUser(body: any, user: Partial<UserOutput>) {
+  function expectTag(body: any, tag: Partial<TagOutput>) {
     expect(body).toHaveProperty('data');
     expect(body.data).toBeDefined();
-    if ('id' in user) {
-      expect(body.data.id).toBe(user.id);
+    if ('id' in tag) {
+      expect(body.data.id).toBe(tag.id);
     } else {
       expect(typeof body.data.id).toBe('string');
     }
-    expect(body.data.email).toBe(user.email);
-    expect(body.data.name).toBe(user.name);
-    expect(body.data.role).toBe(user.role);
-    expect(body.data.password).toBeUndefined();
-    expect(body.data.encryptedPassword).toBeUndefined();
+    if (tag.name) {
+      expect(body.data.name).toBe(slugify(tag.name, { lower: true, strict: true }));
+    } else {
+      expect(body.data.name).toBe(slugify(body.data.name || '', { lower: true, strict: true }));
+    }
   }
 
-  describe('GET /api/users', () => {
+  describe('GET /api/tags', () => {
     it('should be restrained to anonymous users', async () => {
-      const response = await request(app).get('/api/users').set('Accept', 'application/json');
+      const response = await request(app).get('/api/tags').set('Accept', 'application/json');
       expectError(
         response,
         errorMessages['FST_JWT_NO_AUTHORIZATION_IN_HEADER']().code,
@@ -70,7 +70,7 @@ describe('/api/users', function () {
 
     it('should be restrained to invalid users', async () => {
       const response = await request(app)
-        .get('/api/users')
+        .get('/api/tags')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer JaimeLePate`);
       expectError(
@@ -82,7 +82,7 @@ describe('/api/users', function () {
 
     it('should be restrained to expired token', async () => {
       const response = await request(app)
-        .get('/api/users')
+        .get('/api/tags')
         .set('Accept', 'application/json')
         .set(
           'Authorization',
@@ -95,21 +95,20 @@ describe('/api/users', function () {
       );
     });
 
-    it('should be restrained to unauthorized users', async () => {
+    it('should be available to simple users', async () => {
       const response = await request(app)
-        .get('/api/users')
+        .get('/api/tags')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${USER_TOKEN}`);
-      expectError(
-        response,
-        errorMessages['MISSING_PERMISSIONS']().code,
-        errorMessages['MISSING_PERMISSIONS']().message,
-      );
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.status).toBe(200);
+      expect(response.body.data).toBeInstanceOf(Array);
+      expect(response.body.data.length).toBeGreaterThan(0);
     });
 
     it('should have at least one entry', async () => {
       const response = await request(app)
-        .get('/api/users')
+        .get('/api/tags')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expect(response.headers['content-type']).toMatch(/json/);
@@ -120,7 +119,7 @@ describe('/api/users', function () {
 
     it('should be paginated', async () => {
       const responsePage1 = await request(app)
-        .get('/api/users?page=1&perPage=1')
+        .get('/api/tags?page=1&perPage=1')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expect(responsePage1.headers['content-type']).toMatch(/json/);
@@ -128,10 +127,10 @@ describe('/api/users', function () {
       expect(responsePage1.body.data).toBeInstanceOf(Array);
       expect(responsePage1.body.data).toHaveLength(1);
       expect(typeof responsePage1.body.data[0].id).toBe('string');
-      const userId1 = responsePage1.body.data[0].id;
+      const tagId1 = responsePage1.body.data[0].id;
 
       const responsePage2 = await request(app)
-        .get('/api/users?page=2&perPage=1')
+        .get('/api/tags?page=2&perPage=1')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expect(responsePage2.headers['content-type']).toMatch(/json/);
@@ -139,14 +138,14 @@ describe('/api/users', function () {
       expect(responsePage2.body.data).toBeInstanceOf(Array);
       expect(responsePage2.body.data).toHaveLength(1);
       expect(typeof responsePage2.body.data[0].id).toBe('string');
-      expect(responsePage2.body.data[0].id).not.toBe(userId1);
+      expect(responsePage2.body.data[0].id).not.toBe(tagId1);
     });
   });
 
-  describe('GET /api/users/:id', () => {
-    it('should be restrained to anonymous users', async () => {
+  describe('GET /api/tags/:id', () => {
+    it('should be restrained to anonymous user', async () => {
       const response = await request(app)
-        .get('/api/users/83efc0cc-5655-40a7-b1de-f3a39f95c440')
+        .get('/api/tags/80caa1b2-f930-42c0-bbc1-af803047053e')
         .set('Accept', 'application/json');
       expectError(
         response,
@@ -155,9 +154,9 @@ describe('/api/users', function () {
       );
     });
 
-    it('should be restrained to invalid users', async () => {
+    it('should be restrained to invalid user', async () => {
       const response = await request(app)
-        .get('/api/users/83efc0cc-5655-40a7-b1de-f3a39f95c440')
+        .get('/api/tags/80caa1b2-f930-42c0-bbc1-af803047053e')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer JaimeLePate`);
       expectError(
@@ -169,7 +168,7 @@ describe('/api/users', function () {
 
     it('should be restrained to expired token', async () => {
       const response = await request(app)
-        .get('/api/users/83efc0cc-5655-40a7-b1de-f3a39f95c440')
+        .get('/api/tags/80caa1b2-f930-42c0-bbc1-af803047053e')
         .set('Accept', 'application/json')
         .set(
           'Authorization',
@@ -182,81 +181,46 @@ describe('/api/users', function () {
       );
     });
 
-    it('should be restrained to unauthorized users', async () => {
+    it('should be available to simple users', async () => {
       const response = await request(app)
-        .get('/api/users/83efc0cc-5655-40a7-b1de-f3a39f95c440')
+        .get('/api/tags/80caa1b2-f930-42c0-bbc1-af803047053e')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${USER_TOKEN}`);
-      expectError(
-        response,
-        errorMessages['MISSING_PERMISSIONS']().code,
-        errorMessages['MISSING_PERMISSIONS']().message,
-      );
+      expectTag(response.body, {
+        id: '80caa1b2-f930-42c0-bbc1-af803047053e',
+        name: 'nodejs',
+      });
     });
 
-    it('should fetch user with correct id', async () => {
+    it('should fetch tag with correct id', async () => {
       const response = await request(app)
-        .get('/api/users/83efc0cc-5655-40a7-b1de-f3a39f95c440')
+        .get('/api/tags/80caa1b2-f930-42c0-bbc1-af803047053e')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.status).toBe(200);
       expect(response.body.data).toBeTruthy();
-      expectUser(response.body, {
-        email: 'admin@test.me',
-        name: 'Admin Test',
-        role: UserRole.ADMIN,
+      expectTag(response.body, {
+        id: '80caa1b2-f930-42c0-bbc1-af803047053e',
+        name: 'nodejs',
       });
     });
 
     it('expect an error when bad id is sent', async () => {
       const response = await request(app)
-        .get('/api/users/83efc0cd-5655-40a7-b1de-f3a39f95c440')
+        .get('/api/tags/80caa1b2-f930-42c0-bbc1-af803047053f')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expectError(response, 404);
     });
-
-    it('should be allowed to return himself as a user', async () => {
-      const response = await request(app)
-        .get('/api/users/me')
-        .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${USER_TOKEN}`);
-      expect(response.headers['content-type']).toMatch(/json/);
-      expect(response.status).toBe(200);
-      expect(response.body.data).toBeTruthy();
-      expectUser(response.body, {
-        email: 'user@test.me',
-        name: 'User Test',
-        role: UserRole.USER,
-      });
-    });
-
-    it('should be allowed to return himself as an admin', async () => {
-      const response = await request(app)
-        .get('/api/users/me')
-        .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
-      expect(response.headers['content-type']).toMatch(/json/);
-      expect(response.status).toBe(200);
-      expect(response.body.data).toBeTruthy();
-      expectUser(response.body, {
-        email: 'admin@test.me',
-        name: 'Admin Test',
-        role: UserRole.ADMIN,
-      });
-    });
   });
 
-  describe('POST /api/users', () => {
+  describe('POST /api/tags', () => {
     it('should be restrained to anonymous users', async () => {
       const response = await request(app)
-        .post('/api/users')
+        .post('/api/tags')
         .send({
-          email: 'not-authorized+anonymous@test.test',
-          name: 'Not-Authorized Test',
-          role: UserRole.ADMIN,
-          password: 'changemeplease3',
+          name: 'restrained-to-anonymous-users',
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json');
@@ -269,12 +233,9 @@ describe('/api/users', function () {
 
     it('should be restrained to invalid users', async () => {
       const response = await request(app)
-        .post('/api/users')
+        .post('/api/tags')
         .send({
-          email: 'not-authorized+invalid@test.test',
-          name: 'Not-Authorized Test',
-          role: UserRole.ADMIN,
-          password: 'changemeplease3',
+          name: 'restrained-to-invalid-users',
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
@@ -288,12 +249,9 @@ describe('/api/users', function () {
 
     it('should be restrained to expired token', async () => {
       const response = await request(app)
-        .post('/api/users')
+        .post('/api/tags')
         .send({
-          email: 'not-authorized+expired@test.test',
-          name: 'Not-Authorized Test',
-          role: UserRole.ADMIN,
-          password: 'changemeplease3',
+          name: 'restrained-to-expired-token',
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
@@ -308,32 +266,37 @@ describe('/api/users', function () {
       );
     });
 
-    it('should be restrained to unauthorized users', async () => {
+    it('should be available to simple users', async () => {
       const response = await request(app)
-        .post('/api/users')
+        .post('/api/tags')
         .send({
-          email: 'not-authorized+permission@test.test',
-          name: 'Not-Authorized Test',
-          role: UserRole.ADMIN,
-          password: 'changemeplease3',
+          name: 'available-to-simple-users',
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${USER_TOKEN}`);
-      expectError(
-        response,
-        errorMessages['MISSING_PERMISSIONS']().code,
-        errorMessages['MISSING_PERMISSIONS']().message,
-      );
+      expectTag(response.body, {
+        name: 'available-to-simple-users',
+      });
     });
 
-    it('should not create user without email', async () => {
+    it('should not create tag without name', async () => {
       const response = await request(app)
-        .post('/api/users')
+        .post('/api/tags')
+        .send({})
+        .set('Content-Type', 'application/json')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
+      expectError(response, 400);
+    });
+
+    it('should not create tag with an incorrect name', async () => {
+      const response = await request(app)
+        .post('/api/tags')
         .send({
-          name: 'NoEmail Test',
-          password: 'changemeplease2',
-          role: UserRole.USER,
+          name: {
+            fr: 'nom-incorrect',
+          },
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
@@ -341,29 +304,11 @@ describe('/api/users', function () {
       expectError(response, 400);
     });
 
-    it('should not create user with an incorrect email', async () => {
+    it('should not create tag with an already existing name', async () => {
       const response = await request(app)
-        .post('/api/users')
+        .post('/api/tags')
         .send({
-          email: 'incorrect-email@',
-          name: 'IncorrectEmail Test',
-          password: 'changemeplease2',
-          role: UserRole.USER,
-        })
-        .set('Content-Type', 'application/json')
-        .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
-      expectError(response, 400);
-    });
-
-    it('should not create user with an already existing email', async () => {
-      const response = await request(app)
-        .post('/api/users')
-        .send({
-          email: 'user@test.me',
-          name: 'User Test',
-          password: 'changemeplease2',
-          role: UserRole.ADMIN,
+          name: 'nodejs',
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
@@ -371,134 +316,88 @@ describe('/api/users', function () {
       expectError(response, 422);
     });
 
-    it('should not create user without name', async () => {
+    it('should not create tag without name', async () => {
       const response = await request(app)
-        .post('/api/users')
-        .send({
-          email: 'no-name@test.test',
-          password: 'changemeplease2',
-          role: UserRole.USER,
-        })
+        .post('/api/tags')
+        .send({})
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expectError(response, 400);
     });
 
-    it('should not create user without password', async () => {
+    it('should not create tag with name.length > 32', async () => {
+      const name = 'this-tag-is-thirty-two-char-in-it';
+      expect(name).toHaveLength(33);
       const response = await request(app)
-        .post('/api/users')
-        .send({
-          email: 'no-password@test.test',
-          name: 'NoPassword Test',
-          role: UserRole.USER,
-        })
+        .post('/api/tags')
+        .send({ name })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expectError(response, 400);
     });
 
-    it('should not create user with password.length < 12', async () => {
+    it('should create tag with name.length == 32', async () => {
+      const name = 'this-tag-is-thirty-two-char-long';
+      expect(name).toHaveLength(32);
+
       const response = await request(app)
-        .post('/api/users')
-        .send({
-          email: 'no-password@test.test',
-          name: 'NoPassword Test',
-          password: '12345678901',
-          role: UserRole.USER,
-        })
+        .post('/api/tags')
+        .send({ name })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
-      expectError(response, 400);
+      expectTag(response.body, { name });
     });
 
-    it('should not create user without role', async () => {
-      const response = await request(app)
-        .post('/api/users')
-        .send({
-          email: 'no-role@test.test',
-          name: 'NoRole Test',
-          password: 'changemeplease2',
-        })
-        .set('Content-Type', 'application/json')
-        .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
-      expectError(response, 400);
-    });
-
-    it('should create the new user', async () => {
+    it('should create the new tag', async () => {
       const createResponse = await request(app)
-        .post('/api/users')
+        .post('/api/tags')
         .send({
-          email: 'test-create+success@test.test',
-          name: 'Test Test',
-          role: UserRole.USER,
-          password: 'changemeplease2',
+          name: "J'aime bien manger du pâté !",
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
-      expect(createResponse.headers['content-type']).toMatch(/json/);
-      expect(createResponse.status).toBe(201);
-      expect(createResponse.body.data).toBeDefined();
-      expectUser(createResponse.body, {
-        email: 'test-create+success@test.test',
-        name: 'Test Test',
-        role: UserRole.USER,
+      expectTag(createResponse.body, {
+        name: "J'aime bien manger du pâté !",
       });
-      // Test signin for the new user to test password persistance
-      const authResponse = await request(app)
-        .post('/api/auth/sign')
-        .send({
-          email: 'test-create+success@test.test',
-          password: 'changemeplease2',
-        })
-        .set('Content-Type', 'application/json')
-        .set('Accept', 'application/json');
-      expect(typeof authResponse.body.accessToken).toBe('string');
-      // Test fetching the new user to test every other fields persistance
+      // Test fetching the new tag
       const showResponse = await request(app)
-        .get('/api/users/' + createResponse.body.data.id)
+        .get('/api/tags/' + createResponse.body.data.id)
         .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
+        .set('Authorization', `Bearer ${USER_TOKEN}`);
       expect(showResponse.headers['content-type']).toMatch(/json/);
       expect(showResponse.status).toBe(200);
       expect(showResponse.body.data).toBeTruthy();
-      expectUser(showResponse.body, {
-        id: createResponse.body.data.id,
-        email: createResponse.body.data.email,
-        name: createResponse.body.data.name,
-        role: createResponse.body.data.role,
+      expectTag(showResponse.body, {
+        name: "J'aime bien manger du pâté !",
       });
     });
   });
 
-  describe('PATCH /api/users/:id', () => {
-    const USERS: UserOutput[] = [];
+  describe('PATCH /api/tags/:id', () => {
+    const TAGS: TagOutput[] = [];
     let index = 0;
     beforeEach(async function () {
       const position = index++;
       const response = await request(app)
-        .post('/api/users')
+        .post('/api/tags')
         .send({
-          email: `patching+${position}@test.test`,
-          name: `Patching(${position}) Test`,
-          role: UserRole.USER,
-          password: 'changemeplease',
+          name: `patch-tag-${position}`,
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
-      USERS.push(response.body.data);
+      TAGS.push(response.body.data);
     });
 
     it('should be restrained to anonymous users', async () => {
-      const localUser = USERS.pop();
-      expect(localUser?.id).toBeDefined();
+      const localTag = TAGS.pop();
+      expect(localTag?.id).toBeDefined();
       const response = await request(app)
-        .patch(`/api/users/${localUser?.id}`)
+        .patch(`/api/tags/${localTag?.id}`)
         .send({
           name: 'Not Authorized Test',
         })
@@ -512,10 +411,10 @@ describe('/api/users', function () {
     });
 
     it('should be restrained to invalid users', async () => {
-      const localUser = USERS.pop();
-      expect(localUser?.id).toBeDefined();
+      const localTag = TAGS.pop();
+      expect(localTag?.id).toBeDefined();
       const response = await request(app)
-        .patch(`/api/users/${localUser?.id}`)
+        .patch(`/api/tags/${localTag?.id}`)
         .send({
           name: 'Not Authorized Test',
         })
@@ -530,10 +429,10 @@ describe('/api/users', function () {
     });
 
     it('should be restrained to expired token', async () => {
-      const localUser = USERS.pop();
-      expect(localUser?.id).toBeDefined();
+      const localTag = TAGS.pop();
+      expect(localTag?.id).toBeDefined();
       const response = await request(app)
-        .patch(`/api/users/${localUser?.id}`)
+        .patch(`/api/tags/${localTag?.id}`)
         .send({
           name: 'Not Authorized Test',
         })
@@ -551,10 +450,10 @@ describe('/api/users', function () {
     });
 
     it('should be restrained to unauthorized users', async () => {
-      const localUser = USERS.pop();
-      expect(localUser?.id).toBeDefined();
+      const localTag = TAGS.pop();
+      expect(localTag?.id).toBeDefined();
       const response = await request(app)
-        .patch(`/api/users/${localUser?.id}`)
+        .patch(`/api/tags/${localTag?.id}`)
         .send({
           name: 'Not Authorized Test',
         })
@@ -568,30 +467,32 @@ describe('/api/users', function () {
       );
     });
 
-    it('should update user name', async () => {
-      const localUser = USERS.pop();
-      expect(localUser?.id).toBeDefined();
+    it('should update tag name', async () => {
+      const localTag = TAGS.pop();
+      expect(localTag?.id).toBeDefined();
       const response = await request(app)
-        .patch(`/api/users/${localUser?.id}`)
+        .patch(`/api/tags/${localTag?.id}`)
         .send({
-          name: 'Patching Test 02',
+          name: 'Patching-This-Tag-Should-Success',
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
-      expectUser(response.body, {
-        ...localUser,
-        name: 'Patching Test 02',
+      expectTag(response.body, {
+        ...localTag,
+        name: 'Patching-This-Tag-Should-Success',
       });
     });
 
-    it('should not update user with incorrect email', async () => {
-      const localUser = USERS.pop();
-      expect(localUser?.id).toBeDefined();
+    it('should not update tag with incorrect name', async () => {
+      const localTag = TAGS.pop();
+      expect(localTag?.id).toBeDefined();
       const response = await request(app)
-        .patch(`/api/users/${localUser?.id}`)
+        .patch(`/api/tags/${localTag?.id}`)
         .send({
-          email: 'incorrect-email@',
+          name: {
+            en: 'this-is-incorrect',
+          },
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
@@ -599,13 +500,13 @@ describe('/api/users', function () {
       expectError(response, 400);
     });
 
-    it('should not update user with an already existing email', async () => {
-      const localUser = USERS.pop();
-      expect(localUser?.id).toBeDefined();
+    it('should not update tag with an already existing name', async () => {
+      const localTag = TAGS.pop();
+      expect(localTag?.id).toBeDefined();
       const response = await request(app)
-        .patch(`/api/users/${localUser?.id}`)
+        .patch(`/api/tags/${localTag?.id}`)
         .send({
-          email: 'admin@test.me',
+          name: 'nodejs',
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
@@ -613,101 +514,72 @@ describe('/api/users', function () {
       expectError(response, 422);
     });
 
-    it('should update user with the new email', async () => {
-      const localUser = USERS.pop();
-      expect(localUser?.id).toBeDefined();
+    it('should update tag with the new name', async () => {
+      const localTag = TAGS.pop();
+      expect(localTag?.id).toBeDefined();
       const response = await request(app)
-        .patch(`/api/users/${localUser?.id}`)
+        .patch(`/api/tags/${localTag?.id}`)
         .send({
-          email: 'updated-email@test.me',
+          name: 'patch-look-at-my-new-name',
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
-      expectUser(response.body, {
-        ...localUser,
-        email: 'updated-email@test.me',
+      expectTag(response.body, {
+        ...localTag,
+        name: 'patch-look-at-my-new-name',
       });
     });
 
-    it('should update user without role', async () => {
-      const localUser = USERS.pop();
-      expect(localUser?.id).toBeDefined();
-      const response = await request(app)
-        .patch(`/api/users/${localUser?.id}`)
-        .send({
-          role: UserRole.ADMIN,
-        })
-        .set('Content-Type', 'application/json')
-        .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
-      expectUser(response.body, {
-        ...localUser,
-        role: UserRole.ADMIN,
-      });
-    });
+    it('should not update tag with name.length > 32', async () => {
+      const localTag = TAGS.pop();
+      expect(localTag?.id).toBeDefined();
 
-    it('should not update user with password.length < 12', async () => {
-      const localUser = USERS.pop();
-      expect(localUser?.id).toBeDefined();
+      const name = 'this-tag-is-thirty-two-char-in-it';
+      expect(name).toHaveLength(33);
+
       const response = await request(app)
-        .patch(`/api/users/${localUser?.id}`)
-        .send({
-          password: '12345678901',
-        })
+        .patch(`/api/tags/${localTag?.id}`)
+        .send({ name })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expectError(response, 400);
     });
 
-    it('should update user with the new password', async () => {
-      const localUser = USERS.pop();
-      expect(localUser?.id).toBeDefined();
-      await request(app)
-        .patch(`/api/users/${localUser?.id}`)
-        .send({
-          password: 'jaimeleponey3$',
-        })
+    it('should update tag with name.length == 32', async () => {
+      const name = 'this-tag-is-thirty-two-char-wide';
+      expect(name).toHaveLength(32);
+      const response = await request(app)
+        .post('/api/tags')
+        .send({ name })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
-
-      const authResponse = await request(app)
-        .post('/api/auth/sign')
-        .send({
-          email: localUser?.email,
-          password: 'jaimeleponey3$',
-        })
-        .set('Accept', 'application/json')
-        .set('Content-Type', 'application/json');
-      expect(typeof authResponse.body.accessToken).toBe('string');
+      expectTag(response.body, { name });
     });
   });
 
-  describe('DELETE /api/users/:id', function () {
-    const USERS: UserOutput[] = [];
+  describe('DELETE /api/tags/:id', function () {
+    const TAGS: TagOutput[] = [];
     let index = 0;
     beforeEach(async function () {
       const position = index++;
       const response = await request(app)
-        .post('/api/users')
+        .post('/api/tags')
         .send({
-          email: `deleting+${position}@test.test`,
-          name: `Deleting(${position}) Test`,
-          role: UserRole.USER,
-          password: 'changemeplease',
+          name: `deleting-tag-${position}`,
         })
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
-      USERS.push(response.body.data);
+      TAGS.push(response.body.data);
     });
     it('should be restrained to anonymous users', async () => {
-      const localUser = USERS.pop();
-      expect(localUser?.id).toBeDefined();
+      const localTag = TAGS.pop();
+      expect(localTag?.id).toBeDefined();
       const response = await request(app)
-        .delete(`/api/users/${localUser?.id}`)
+        .delete(`/api/tags/${localTag?.id}`)
         .set('Accept', 'application/json');
       expectError(
         response,
@@ -717,10 +589,10 @@ describe('/api/users', function () {
     });
 
     it('should be restrained to invalid users', async () => {
-      const localUser = USERS.pop();
-      expect(localUser?.id).toBeDefined();
+      const localTag = TAGS.pop();
+      expect(localTag?.id).toBeDefined();
       const response = await request(app)
-        .delete(`/api/users/${localUser?.id}`)
+        .delete(`/api/tags/${localTag?.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer JaimeLePate`);
       expectError(
@@ -731,10 +603,10 @@ describe('/api/users', function () {
     });
 
     it('should be restrained to expired token', async () => {
-      const localUser = USERS.pop();
-      expect(localUser?.id).toBeDefined();
+      const localTag = TAGS.pop();
+      expect(localTag?.id).toBeDefined();
       const response = await request(app)
-        .delete(`/api/users/${localUser?.id}`)
+        .delete(`/api/tags/${localTag?.id}`)
         .set('Accept', 'application/json')
         .set(
           'Authorization',
@@ -747,10 +619,10 @@ describe('/api/users', function () {
       );
     });
     it('should be restrained to unauthorized users', async () => {
-      const localUser = USERS.pop();
-      expect(localUser?.id).toBeDefined();
+      const localTag = TAGS.pop();
+      expect(localTag?.id).toBeDefined();
       const response = await request(app)
-        .delete(`/api/users/${localUser?.id}`)
+        .delete(`/api/tags/${localTag?.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${USER_TOKEN}`);
       expectError(
@@ -762,17 +634,17 @@ describe('/api/users', function () {
 
     it('should not delete unknown id', async () => {
       const response = await request(app)
-        .delete(`/api/users/e50cae52-c794-4e07-baaf-f489d4c4bea9`)
+        .delete(`/api/tags/e50cae52-c794-4e07-baaf-f489d4c4bea9`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expectError(response, 404);
     });
 
-    it('should delete the user', async () => {
-      const localUser = USERS.pop();
-      expect(localUser?.id).toBeDefined();
+    it('should delete the tag', async () => {
+      const localTag = TAGS.pop();
+      expect(localTag?.id).toBeDefined();
       const deleteResponse = await request(app)
-        .delete(`/api/users/${localUser?.id}`)
+        .delete(`/api/tags/${localTag?.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expect(deleteResponse.headers['content-type']).toMatch(/json/);
@@ -781,11 +653,22 @@ describe('/api/users', function () {
       expect(Object.keys(deleteResponse.body)).toHaveLength(0);
 
       const getResponse = await request(app)
-        .get(`/api/users/${localUser?.id}`)
+        .get(`/api/tags/${localTag?.id}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expect(getResponse.headers['content-type']).toMatch(/json/);
       expectError(getResponse, 404);
+    });
+
+    it('should delete the tag which is related to a bookmark', async () => {
+      const deleteResponse = await request(app)
+        .delete(`/api/tags/d860d634-052a-4ad5-af43-7335d45e73ba`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
+      expect(deleteResponse.headers['content-type']).toMatch(/json/);
+      expect(deleteResponse.status).toBe(200);
+      expect(typeof deleteResponse.body).toBe('object');
+      expect(Object.keys(deleteResponse.body)).toHaveLength(0);
     });
   });
 });

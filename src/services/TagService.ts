@@ -1,3 +1,4 @@
+import slugify from 'slugify';
 import type { FindAllOptions, ICrudService } from '../@types/ICrudService';
 import { getRepository } from '../db';
 import { Tag } from '../models/Tag';
@@ -35,16 +36,39 @@ class TagService implements ICrudService<Tag, TagCreateInput, TagUpdateInput> {
     });
   }
 
-  create(_input: { name: string }): Promise<Tag> {
-    throw new Error('Method not implemented.');
+  create(input: TagCreateInput): Promise<Tag> {
+    const repo = getRepository(Tag);
+    return repo.save(
+      repo.create({
+        name: this.slugifyTagName(input.name),
+      }),
+    );
   }
 
-  update(_id: string, _input: { name: string }): Promise<Tag> {
-    throw new Error('Method not implemented.');
+  async update(id: string, input: TagUpdateInput): Promise<Tag> {
+    const dbOriginalTag = await getRepository(Tag).findOneOrFail({
+      where: { id },
+    });
+    return getRepository(Tag).save(
+      Object.assign(dbOriginalTag, {
+        ...input,
+        name: this.slugifyTagName(input.name),
+      }),
+    );
   }
 
-  delete(_id: string): Promise<boolean> {
-    throw new Error('Method not implemented.');
+  async delete(id: string): Promise<boolean> {
+    const deleteResult = await getRepository(Tag).delete({
+      id,
+    });
+    return (deleteResult.affected || 0) !== 0;
+  }
+
+  private slugifyTagName(name: string): string {
+    return slugify(name, {
+      lower: true,
+      strict: true,
+    });
   }
 }
 
