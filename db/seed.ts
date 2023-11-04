@@ -53,9 +53,10 @@ main()
   .then(async () => {
     await appDataSource.destroy();
   })
-
   .catch(async (e) => {
     console.error(e);
-    await appDataSource.destroy();
+    if (appDataSource.isInitialized) {
+      await appDataSource.destroy();
+    }
     process.exit(1);
   });
