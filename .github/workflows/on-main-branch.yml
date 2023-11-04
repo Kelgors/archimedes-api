@@ -19,13 +19,12 @@ jobs:
         db:
           - id: postgres
             start: 'sudo systemctl start postgresql.service'
-            create_db: 'sudo -u postgres psql createdb bookmarks'
             env:
               DB_TYPE: postgres
               DB_HOST: localhost
               DB_PORT: 5432
-              DB_USER: user
-              DB_NAME: bookmarks
+              DB_USER: postgres
+              DB_NAME: postgres
           - id: mysql
             start: 'sudo systemctl start mysql.service'
             create_db: 'sudo mysql -u root -p=root -e "create database bookmarks"'
