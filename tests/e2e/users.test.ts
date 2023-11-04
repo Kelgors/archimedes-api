@@ -1,4 +1,5 @@
 import type { FastifyInstance, RawServerDefault } from 'fastify';
+import { omit } from 'lodash';
 import request from 'supertest';
 import { UserRole } from '../../src/models/User';
 import type { UserOutput } from '../../src/schemas/User';
@@ -754,8 +755,8 @@ describe('/api/users', function () {
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expect(deleteResponse.headers['content-type']).toMatch(/json/);
       expect(deleteResponse.status).toBe(200);
-      expect(typeof deleteResponse.body).toBe('object');
-      expect(Object.keys(deleteResponse.body)).toHaveLength(0);
+      expect(deleteResponse.body).toHaveProperty('data');
+      expect(deleteResponse.body.data).toEqual(omit(localUser, ['id']));
 
       const getResponse = await request(app)
         .get(`/api/users/${localUser?.id}`)

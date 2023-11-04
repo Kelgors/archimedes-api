@@ -36,10 +36,7 @@ class UserService implements ICrudService<User, UserCreateInputBody, UserUpdateI
     });
   }
 
-  async update(id: string, input: UserUpdateInputBody): Promise<User> {
-    const dbOriginalUser = await getRepository(User).findOneOrFail({
-      where: { id },
-    });
+  async update(dbOriginalUser: User, input: UserUpdateInputBody): Promise<User> {
     const dbPayload = Object.assign({}, dbOriginalUser, omit(input, ['password']));
     if (input.password) {
       dbPayload.encryptedPassword = await passwordEncryptionService.encryptPassword(input.password);
@@ -47,11 +44,8 @@ class UserService implements ICrudService<User, UserCreateInputBody, UserUpdateI
     return getRepository(User).save(dbPayload);
   }
 
-  async delete(id: string): Promise<boolean> {
-    const deleteResult = await getRepository(User).delete({
-      id,
-    });
-    return (deleteResult.affected || 0) !== 0;
+  delete(item: User): Promise<User> {
+    return getRepository(User).remove(item);
   }
 }
 

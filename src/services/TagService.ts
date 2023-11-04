@@ -45,10 +45,7 @@ class TagService implements ICrudService<Tag, TagCreateInputBody, TagUpdateInput
     );
   }
 
-  async update(id: string, input: TagUpdateInputBody): Promise<Tag> {
-    const dbOriginalTag = await getRepository(Tag).findOneOrFail({
-      where: { id },
-    });
+  update(dbOriginalTag: Tag, input: TagUpdateInputBody): Promise<Tag> {
     return getRepository(Tag).save(
       Object.assign(dbOriginalTag, {
         ...input,
@@ -57,11 +54,8 @@ class TagService implements ICrudService<Tag, TagCreateInputBody, TagUpdateInput
     );
   }
 
-  async delete(id: string): Promise<boolean> {
-    const deleteResult = await getRepository(Tag).delete({
-      id,
-    });
-    return (deleteResult.affected || 0) !== 0;
+  delete(item: Tag): Promise<Tag> {
+    return getRepository(Tag).remove(item);
   }
 
   private slugifyTagName(name: string): string {

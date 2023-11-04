@@ -22,7 +22,9 @@ export const UserOutputSchema = z.object({
   name: USER_NAME,
   role: USER_ROLE,
 });
+export const DeleteUserOutputSchema = UserOutputSchema.merge(z.object({ id: USER_ID.optional() }));
 
 export type UserCreateInputBody = z.infer<typeof UserCreateInputBodySchema>;
 export type UserUpdateInputBody = z.infer<typeof UserUpdateInputBodySchema>;
 export type UserOutput = z.infer<typeof UserOutputSchema>;
+export type DeleteUserOutput = z.infer<typeof DeleteUserOutputSchema>;

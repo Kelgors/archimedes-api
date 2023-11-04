@@ -25,7 +25,7 @@ class AuthService {
     }
 
     if (passwordEncryptionService.needsRehash(dbUser.encryptedPassword)) {
-      await userService.update(dbUser.id, {
+      await userService.update(dbUser, {
         password: plainPassword,
       });
     }
