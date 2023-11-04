@@ -1,8 +1,8 @@
 import { EntityNotFoundError } from 'typeorm';
 import { getRepository } from '../db';
 import { AuthRefreshToken } from '../models/AuthRefreshToken';
-import { User, UserRole } from '../models/User';
-import { AccessToken, RefreshToken } from '../schemas/Auth';
+import type { User, UserRole } from '../models/User';
+import type { AccessToken, RefreshToken } from '../schemas/Auth';
 import { AppError, AppErrorCode } from '../utils/ApplicationError';
 import { passwordEncryptionService } from './PasswordEncryptionService';
 import { userService } from './UserService';

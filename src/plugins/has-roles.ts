@@ -1,5 +1,5 @@
-import { UserRole } from '../models/User';
-import { AppPreHandlerAsyncHookHandler } from '../utils/AppRouteOptions';
+import type { UserRole } from '../models/User';
+import type { AppPreHandlerAsyncHookHandler } from '../utils/AppRouteOptions';
 import { AppError, AppErrorCode } from '../utils/ApplicationError';
 
 export function hasRoles(...roles: UserRole[]): AppPreHandlerAsyncHookHandler {

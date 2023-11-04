@@ -1,9 +1,10 @@
 import fastifyJwt from '@fastify/jwt';
-import { FastifyPluginAsync } from 'fastify';
+import type { FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
 import { JWT_SECRET } from '../config';
-import { AccessToken, AccessTokenSchema } from '../schemas/Auth';
-import { AppPreHandlerAsyncHookHandler } from '../utils/AppRouteOptions';
+import type { AccessToken } from '../schemas/Auth';
+import { AccessTokenSchema } from '../schemas/Auth';
+import type { AppPreHandlerAsyncHookHandler } from '../utils/AppRouteOptions';
 
 declare module 'fastify' {
   interface FastifyInstance {

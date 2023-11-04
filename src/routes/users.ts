@@ -1,8 +1,9 @@
-import { FastifyInstance } from 'fastify';
-import { ZodTypeProvider } from 'fastify-type-provider-zod';
+import type { FastifyInstance } from 'fastify';
+import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { omit } from 'lodash';
 import { z } from 'zod';
-import { User, UserRole } from '../models/User';
+import type { User } from '../models/User';
+import { UserRole } from '../models/User';
 import { hasRoles } from '../plugins/has-roles';
 import { USER_ID, UserCreateInputBodySchema, UserOutputSchema, UserUpdateInputBodySchema } from '../schemas/User';
 import { userService } from '../services/UserService';

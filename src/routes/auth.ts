@@ -1,7 +1,8 @@
-import { FastifyInstance } from 'fastify';
-import { ZodTypeProvider } from 'fastify-type-provider-zod';
+import type { FastifyInstance } from 'fastify';
+import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { AuthRefreshInputBodySchema, AuthSignInputBodySchema, RefreshToken } from '../schemas/Auth';
+import type { RefreshToken } from '../schemas/Auth';
+import { AuthRefreshInputBodySchema, AuthSignInputBodySchema } from '../schemas/Auth';
 import { authService } from '../services/AuthService';
 
 const buildAuthRoutes = function (fastify: FastifyInstance) {
