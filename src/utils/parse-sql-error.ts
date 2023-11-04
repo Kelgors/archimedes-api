@@ -4,7 +4,7 @@ import { AppError, AppErrorCode } from './ApplicationError';
 const SQLITE_UNIQUE_CONSTRAINT = /UNIQUE constraint failed: (\w+)\.(\w+)/;
 const PG_UNIQUE_CONSTRAINT = /^Key \((\w+)\)=\(([\w@\-.]+)\) already exists.$/;
 const MYSQL_UNIQUE_CONSTRAINT_VALUE = /^Duplicate entry '([\w@\-.]+)'/;
-const MYSQL_UNIQUE_CONSTRAINT_TABLE = /^INSERT INTO `(.+)`\(/;
+const MYSQL_UNIQUE_CONSTRAINT_TABLE = /^INSERT INTO `(.+)`\(|^UPDATE `(.+)` SET/;
 export type AbsUniqueConstraint = {
   table: string;
   column: string | null;
