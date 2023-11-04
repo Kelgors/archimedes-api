@@ -4,7 +4,7 @@ import request from 'supertest';
 import type { TagOutput } from '../../src/schemas/Tag';
 import { createServer } from '../../src/server';
 import errorMessages from '../../src/utils/error-messages';
-import { expectError } from '../lib';
+import { expectError, signIn } from '../lib';
 
 describe('/api/tags', function () {
   let fastify: FastifyInstance | undefined;
@@ -14,32 +14,9 @@ describe('/api/tags', function () {
   beforeAll(async function () {
     fastify = await createServer();
     app = fastify.server;
-    await Promise.all([
-      request(app)
-        .post('/api/auth/sign')
-        .send({
-          email: 'admin@test.me',
-          password: 'changemeplease',
-        })
-        .set('Accept', 'application/json')
-        .set('Content-Type', 'application/json')
-        .then(function (response) {
-          expect(response.body).toHaveProperty('accessToken');
-          ADMIN_TOKEN = response.body.accessToken;
-        }),
-      request(app)
-        .post('/api/auth/sign')
-        .send({
-          email: 'user@test.me',
-          password: 'changemeplease',
-        })
-        .set('Accept', 'application/json')
-        .set('Content-Type', 'application/json')
-        .then(function (response) {
-          expect(response.body).toHaveProperty('accessToken');
-          USER_TOKEN = response.body.accessToken;
-        }),
-    ]);
+    const [adminToken, userToken] = await signIn(app);
+    ADMIN_TOKEN = adminToken;
+    USER_TOKEN = userToken;
   });
   afterAll(() => fastify?.close());
 
