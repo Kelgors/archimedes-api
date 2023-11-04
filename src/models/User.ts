@@ -1,4 +1,5 @@
 import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { AuthRefreshToken } from './AuthRefreshToken';
 import { List } from './List';
 import { ListPermission } from './ListPermission';
 
@@ -24,6 +25,9 @@ export class User {
 
   @Column({ type: String, default: UserRole.USER })
   role: UserRole;
+
+  @OneToMany(() => AuthRefreshToken, (token) => token.user)
+  refreshTokens: Promise<AuthRefreshToken[]>;
 
   @OneToMany(() => List, (list) => list.owner)
   lists: Promise<List[]>;

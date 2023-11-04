@@ -1,4 +1,4 @@
-import { ObjectLiteral } from 'typeorm';
+import type { ObjectLiteral } from 'typeorm';
 
 export type FindAllOptions = {
   page?: number;

@@ -1,13 +1,14 @@
-import { FastifyPluginAsync } from 'fastify';
+import type { FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
 import { EntityNotFoundError } from 'typeorm';
 import { ZodError } from 'zod';
-import { AppError } from '../utils/ApplicationError';
+import { NODE_ENV } from '../config';
 import { HttpException } from '../utils/HttpException';
+import ErrorMessagesMap from '../utils/error-messages';
 import buildAuthRoutes from './auth';
 import buildUserRoutes from './users';
 
-const routesBuilder: FastifyPluginAsync<{}> = async function (fastify) {
+const routesBuilder: FastifyPluginAsync<never> = async function (fastify) {
   buildAuthRoutes(fastify);
   buildUserRoutes(fastify);
 
@@ -21,20 +22,27 @@ const routesBuilder: FastifyPluginAsync<{}> = async function (fastify) {
   });
 
   fastify.setErrorHandler(async function (error: unknown, req, reply) {
+    if (typeof error !== 'object' || !error) {
+      return reply.code(500).send({
+        error: {
+          code: 500,
+          message: 'error format error',
+        },
+      });
+    }
     if (error instanceof EntityNotFoundError) {
       error = new HttpException(404, 'Not found');
-    }
-    if (error instanceof AppError) {
-      error = error.toHttpException();
-    }
-    if (error instanceof ZodError) {
+    } else if (error instanceof ZodError) {
       error = new HttpException(400, 'Invalid format', error.issues);
+    } else if ('code' in error && typeof error.code === 'string' && error.code in ErrorMessagesMap) {
+      error = ErrorMessagesMap[error.code];
     }
     if (error instanceof HttpException) {
       return reply.code(error.code).send({
         error,
       });
     }
+    if (NODE_ENV === 'development') req.log.error(error);
     return reply.code(500).send({
       error: {
         code: 500,

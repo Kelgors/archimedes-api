@@ -1,9 +1,9 @@
 import { omit } from 'lodash';
 import { QueryFailedError } from 'typeorm';
-import { FindAllOptions, ICrudService } from '../@types/ICrudService';
+import type { FindAllOptions, ICrudService } from '../@types/ICrudService';
 import { getRepository } from '../db';
 import { User } from '../models/User';
-import { UserCreateInputBody, UserUpdateInputBody } from '../schemas/User';
+import type { UserCreateInputBody, UserUpdateInputBody } from '../schemas/User';
 import { HttpException } from '../utils/HttpException';
 import { passwordEncryptionService } from './PasswordEncryptionService';
 

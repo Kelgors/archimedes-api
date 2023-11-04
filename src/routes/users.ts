@@ -1,11 +1,13 @@
-import { FastifyInstance } from 'fastify';
-import { ZodTypeProvider } from 'fastify-type-provider-zod';
+import type { FastifyInstance } from 'fastify';
+import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { omit } from 'lodash';
 import { z } from 'zod';
-import { User, UserRole } from '../models/User';
+import type { User } from '../models/User';
+import { UserRole } from '../models/User';
 import { hasRoles } from '../plugins/has-roles';
 import { USER_ID, UserCreateInputBodySchema, UserOutputSchema, UserUpdateInputBodySchema } from '../schemas/User';
 import { userService } from '../services/UserService';
+import { AppError, AppErrorCode } from '../utils/ApplicationError';
 import { HttpException, HttpExceptionSchema } from '../utils/HttpException';
 
 function renderUser(user: User) {
@@ -63,7 +65,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
     handler: async function (req, reply) {
       // Check if asking for another user than the requesting one && is not admin
       if (req.params.id !== 'me' && req.token.role !== UserRole.ADMIN) {
-        throw new HttpException(401, 'Unauthorized', 'Not sufficient permissions');
+        throw new AppError(AppErrorCode.MISSING_PERMISSIONS);
       }
       const id = req.params.id === 'me' ? req.token.sub || '' : req.params.id;
       const dbUser = await userService.findOne(id);

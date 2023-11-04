@@ -1,7 +1,7 @@
-import { FindAllOptions, ICrudService } from '../@types/ICrudService';
+import type { FindAllOptions, ICrudService } from '../@types/ICrudService';
 import { getRepository } from '../db';
 import { Tag } from '../models/Tag';
-import { TagCreateInput, TagUpdateInput } from '../schemas/Tag';
+import type { TagCreateInput, TagUpdateInput } from '../schemas/Tag';
 
 class TagService implements ICrudService<Tag, TagCreateInput, TagUpdateInput> {
   findAll(options?: FindAllOptions | undefined): Promise<Tag[]> {
@@ -35,15 +35,15 @@ class TagService implements ICrudService<Tag, TagCreateInput, TagUpdateInput> {
     });
   }
 
-  create(input: { name: string }): Promise<Tag> {
+  create(_input: { name: string }): Promise<Tag> {
     throw new Error('Method not implemented.');
   }
 
-  update(id: string, input: { name: string }): Promise<Tag> {
+  update(_id: string, _input: { name: string }): Promise<Tag> {
     throw new Error('Method not implemented.');
   }
 
-  delete(id: string): Promise<boolean> {
+  delete(_id: string): Promise<boolean> {
     throw new Error('Method not implemented.');
   }
 }
