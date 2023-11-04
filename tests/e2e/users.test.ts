@@ -368,7 +368,7 @@ describe('/api/users', function () {
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
-      expectError(response, 400);
+      expectError(response, 422);
     });
 
     it('should not create user without name', async () => {
@@ -610,7 +610,7 @@ describe('/api/users', function () {
         .set('Content-Type', 'application/json')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
-      expectError(response, 400);
+      expectError(response, 422);
     });
 
     it('should update user with the new email', async () => {

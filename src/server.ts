@@ -11,6 +11,7 @@ export async function createServer() {
     logger: loggerConfig,
   });
 
+  fastify.log.info(`Starting connection to ${appDataSource.options.type}`);
   await appDataSource.initialize();
   fastify.addHook('onClose', () => appDataSource.destroy());
 

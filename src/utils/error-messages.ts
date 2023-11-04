@@ -14,7 +14,6 @@ export default {
   [AppErrorCode.WRONG_EMAIL_OR_PASSWORD]: () => new HttpException(404, 'User with email/password pair not found'),
   [AppErrorCode.MISSING_PERMISSIONS]: () => new HttpException(401, 'Not sufficient permissions'),
 
-  [AppErrorCode.ORM_UNIQUE_CONSTRAINT]: (error: AppError) => new HttpException(400, error.message, error.details),
   [AppErrorCode.UNSUPPORTED_ERROR]: (error: AppError) => {
     return new HttpException(500, error.message || 'Internal error', error.details);
   },
