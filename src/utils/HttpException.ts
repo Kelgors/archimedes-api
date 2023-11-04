@@ -5,6 +5,7 @@ export class HttpException {
     public readonly code: number,
     public readonly message?: string,
     public readonly details?: unknown,
+    public readonly isPublicDetails?: boolean,
   ) {}
 }
 
