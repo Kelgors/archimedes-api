@@ -18,28 +18,39 @@ jobs:
       matrix:
         db:
           - id: postgres
-            start: 'sudo systemctl start postgresql.service'
+            services:
+              db:
+                image: postgres
+                env:
+                  POSTGRES_PASSWORD: postgres
             env:
               DB_TYPE: postgres
-              DB_HOST: localhost
+              DB_HOST: postgres
               DB_PORT: 5432
               DB_USER: postgres
               DB_NAME: postgres
           - id: mysql
-            start: 'sudo systemctl start mysql.service'
-            create_db: 'sudo mysql -u root -p=root -e "create database bookmarks"'
+            services:
+              db:
+                image: mariadb
+                env:
+                  MARIADB_USER: user
+                  MARIADB_PASSWORD: password
+                  MARIADB_DATABASE: bookmarks
+                  MARIADB_ROOT_PASSWORD: root
             env:
               DB_TYPE: mariadb
-              DB_HOST: localhost
+              DB_HOST: db
               DB_PORT: 3306
-              DB_USER: root
-              DB_PASS: root
+              DB_USER: user
+              DB_PASS: password
               DB_NAME: bookmarks
           - id: sqlite
             env:
               DB_TYPE: sqlite
               DB_NAME: db/test.db
         node: [20]
+    services: ${{ matrix.db.services }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -64,14 +75,6 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
-
-      - name: Start database
-        run: ${{ matrix.db.start }}
-        if: ${{ matrix.db.start }}
-
-      - name: Create database
-        run: ${{ matrix.db.create_db }}
-        if: ${{ matrix.db.create_db }}
 
       - name: Test
         run: npm test
