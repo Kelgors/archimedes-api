@@ -49,6 +49,7 @@ jobs:
             env:
               DB_TYPE: sqlite
               DB_NAME: db/test.db
+            services: {}
         node: [20]
     services: ${{ matrix.db.services }}
     steps:
