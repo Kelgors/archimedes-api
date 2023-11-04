@@ -18,7 +18,8 @@ jobs:
       matrix:
         db:
           - id: postgres
-            start: sudo systemctl start postgresql.service
+            start: 'sudo systemctl start postgresql.service'
+            create_db: 'sudo -u postgres psql createdb bookmarks'
             env:
               DB_TYPE: postgres
               DB_HOST: localhost
@@ -26,7 +27,8 @@ jobs:
               DB_USER: user
               DB_NAME: bookmarks
           - id: mysql
-            start: sudo systemctl start mysql.service
+            start: 'sudo systemctl start mysql.service'
+            create_db: 'mysql -u root -p=root -e "create database bookmarks"'
             env:
               DB_TYPE: mariadb
               DB_HOST: localhost
@@ -64,9 +66,13 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Prepare database
+      - name: Start database
         run: ${{ matrix.db.start }}
         if: ${{ matrix.db.start }}
+
+      - name: Create database
+        run: ${{ matrix.db.create_db }}
+        if: ${{ matrix.db.create_db }}
 
       - name: Test
         run: npm test
