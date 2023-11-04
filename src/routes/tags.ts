@@ -3,7 +3,7 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { UserRole } from '../models/User';
 import { hasRoles } from '../plugins/has-roles';
-import { ApiTagSchema, TAG_ID, TagCreateInputSchema, TagUpdateInputSchema } from '../schemas/Tag';
+import { TAG_ID, TagCreateInputBodySchema, TagOutputSchema, TagUpdateInputBodySchema } from '../schemas/Tag';
 import { tagService } from '../services/TagService';
 import { HttpException, HttpExceptionSchema } from '../utils/HttpException';
 
@@ -23,7 +23,7 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
         .partial(),
       response: {
         200: z.object({
-          data: z.array(ApiTagSchema),
+          data: z.array(TagOutputSchema),
         }),
       },
     },
@@ -48,7 +48,7 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
       }),
       response: {
         200: z.object({
-          data: ApiTagSchema,
+          data: TagOutputSchema,
         }),
         404: z.object({
           error: HttpExceptionSchema,
@@ -66,10 +66,10 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
     url: '/api/tags',
     preHandler: [fastify.authenticate],
     schema: {
-      body: TagCreateInputSchema,
+      body: TagCreateInputBodySchema,
       response: {
         200: z.object({
-          data: ApiTagSchema,
+          data: TagOutputSchema,
         }),
         404: z.object({
           error: HttpExceptionSchema,
@@ -90,10 +90,10 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
       params: z.object({
         id: TAG_ID,
       }),
-      body: TagUpdateInputSchema,
+      body: TagUpdateInputBodySchema,
       response: {
         200: z.object({
-          data: ApiTagSchema,
+          data: TagOutputSchema,
         }),
         404: z.object({
           error: HttpExceptionSchema,

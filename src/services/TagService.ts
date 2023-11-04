@@ -2,9 +2,9 @@ import slugify from 'slugify';
 import type { FindAllOptions, ICrudService } from '../@types/ICrudService';
 import { getRepository } from '../db';
 import { Tag } from '../models/Tag';
-import type { TagCreateInput, TagUpdateInput } from '../schemas/Tag';
+import type { TagCreateInputBody, TagUpdateInputBody } from '../schemas/Tag';
 
-class TagService implements ICrudService<Tag, TagCreateInput, TagUpdateInput> {
+class TagService implements ICrudService<Tag, TagCreateInputBody, TagUpdateInputBody> {
   findAll(options?: FindAllOptions | undefined): Promise<Tag[]> {
     const take = Math.min(options?.perPage || 20, 50);
     const skip = ((options?.page || 1) - 1) * take;
@@ -36,7 +36,7 @@ class TagService implements ICrudService<Tag, TagCreateInput, TagUpdateInput> {
     });
   }
 
-  create(input: TagCreateInput): Promise<Tag> {
+  create(input: TagCreateInputBody): Promise<Tag> {
     const repo = getRepository(Tag);
     return repo.save(
       repo.create({
@@ -45,7 +45,7 @@ class TagService implements ICrudService<Tag, TagCreateInput, TagUpdateInput> {
     );
   }
 
-  async update(id: string, input: TagUpdateInput): Promise<Tag> {
+  async update(id: string, input: TagUpdateInputBody): Promise<Tag> {
     const dbOriginalTag = await getRepository(Tag).findOneOrFail({
       where: { id },
     });
