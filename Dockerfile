@@ -12,6 +12,7 @@ ENV NODE_ENV=production
 ENV PORT=80
 EXPOSE 80
 WORKDIR /app
-COPY --from=builder /app /app
+COPY --from=builder /app/node_modules /app/node_modules
+COPY --from=builder /app/dist/src /app/dist
 HEALTHCHECK CMD curl -sf http://127.0.0.1 > /dev/null && exit 0 || exit 1
-CMD ["npm", "start"]
+CMD ["node", "/app/dist/index.js"]
