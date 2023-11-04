@@ -4,21 +4,22 @@ import { EntityNotFoundError, QueryFailedError } from 'typeorm';
 import { ZodError } from 'zod';
 import { NODE_ENV } from '../config';
 import { HttpException } from '../utils/HttpException';
-import ErrorMessagesMap from '../utils/error-messages';
+import errorMessagesMap from '../utils/error-messages';
 import buildAuthRoutes from './auth';
+import buildTagRoutes from './tags';
 import buildUserRoutes from './users';
 
 const routesBuilder: FastifyPluginAsync<never> = async function (fastify) {
   buildAuthRoutes(fastify);
   buildUserRoutes(fastify);
+  buildTagRoutes(fastify);
 
-  fastify.all('/api/*', function (req, reply) {
-    reply.code(404).send({
-      error: {
-        code: 404,
-        message: `Route ${req.method}:${req.url} not found`,
-      },
-    });
+  fastify.get('/api/ping', function (req, reply) {
+    reply.code(200).send('Pong');
+  });
+
+  fastify.all('/api/*', function (req, _reply) {
+    throw new HttpException(404, `Route ${req.method}:${req.url} not found`);
   });
 
   fastify.setErrorHandler(async function (error: unknown, req, reply) {
@@ -36,8 +37,8 @@ const routesBuilder: FastifyPluginAsync<never> = async function (fastify) {
       error = new HttpException(422, error.message, error);
     } else if (error instanceof ZodError) {
       error = new HttpException(400, 'Invalid format', error.issues);
-    } else if ('code' in error && typeof error.code === 'string' && error.code in ErrorMessagesMap) {
-      error = ErrorMessagesMap[error.code](error);
+    } else if ('code' in error && typeof error.code === 'string' && error.code in errorMessagesMap) {
+      error = errorMessagesMap[error.code](error);
     }
     if (error instanceof HttpException) {
       return reply.code(error.code).send({

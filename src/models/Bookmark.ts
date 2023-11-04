@@ -19,11 +19,17 @@ export class Bookmark {
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date = new Date();
 
-  @ManyToMany(() => Tag, (tag) => tag.bookmarks)
+  @ManyToMany(() => Tag, (tag) => tag.bookmarks, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   @JoinTable()
   tags: Promise<Tag[]>;
 
-  @ManyToMany(() => List, (list) => list.bookmarks)
+  @ManyToMany(() => List, (list) => list.bookmarks, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   @JoinTable()
   lists: Promise<List[]>;
 }
