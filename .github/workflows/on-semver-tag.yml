@@ -1,6 +1,7 @@
 name: 'Build docker image'
 on:
-  tag: ['v*']
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
 jobs:
   tests:
     runs-on: ubuntu-latest
