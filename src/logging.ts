@@ -14,10 +14,12 @@ const PINO_TARGETS: Record<string, PinoLoggerOptions['transport']> = {
     options: { destination: './app.log' },
   },
 };
-let pinoConfig: boolean | PinoLoggerOptions = true;
-pinoConfig = { transport: PINO_TARGETS[LOG_TARGET] };
-if (LOG_TARGET === 'file' && LOG_PATH && PINO_TARGETS.file?.options) {
-  PINO_TARGETS.file.options.destination = LOG_PATH;
+let pinoConfig: boolean | PinoLoggerOptions = LOG_TARGET === 'true';
+if (LOG_TARGET in PINO_TARGETS) {
+  pinoConfig = { transport: PINO_TARGETS[LOG_TARGET] };
+  if (LOG_TARGET === 'file' && LOG_PATH && PINO_TARGETS.file?.options) {
+    PINO_TARGETS.file.options.destination = LOG_PATH;
+  }
 }
 
 export default pinoConfig;
