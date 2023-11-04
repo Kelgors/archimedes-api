@@ -13,7 +13,7 @@ export function signIn(app: RawServerDefault): Promise<string[]> {
       .set('Content-Type', 'application/json')
       .then(function (response) {
         expect(response.body).toHaveProperty('accessToken');
-        expect(typeof response.body.accessToken).toHaveProperty('string');
+        expect(typeof response.body.accessToken).toBe('string');
         return response.body.accessToken;
       }),
     request(app)
@@ -26,7 +26,7 @@ export function signIn(app: RawServerDefault): Promise<string[]> {
       .set('Content-Type', 'application/json')
       .then(function (response) {
         expect(response.body).toHaveProperty('accessToken');
-        expect(typeof response.body.accessToken).toHaveProperty('string');
+        expect(typeof response.body.accessToken).toBe('string');
         return response.body.accessToken;
       }),
   ]);
