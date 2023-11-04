@@ -23,6 +23,7 @@ jobs:
                 image: postgres
                 env:
                   POSTGRES_PASSWORD: postgres
+                options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=5
             env:
               DB_TYPE: postgres
               DB_HOST: postgres
@@ -38,6 +39,7 @@ jobs:
                   MARIADB_PASSWORD: password
                   MARIADB_DATABASE: bookmarks
                   MARIADB_ROOT_PASSWORD: root
+                options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
             env:
               DB_TYPE: mariadb
               DB_HOST: db
