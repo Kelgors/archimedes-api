@@ -23,11 +23,13 @@ jobs:
                 image: postgres
                 env:
                   POSTGRES_PASSWORD: postgres
+                ports:
+                  - 54320:5432
                 options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=5
             env:
               DB_TYPE: postgres
-              DB_HOST: db
-              DB_PORT: 5432
+              DB_HOST: localhost
+              DB_PORT: 54320
               DB_USER: postgres
               DB_PASS: postgres
               DB_NAME: postgres
@@ -40,11 +42,13 @@ jobs:
                   MARIADB_PASSWORD: password
                   MARIADB_DATABASE: bookmarks
                   MARIADB_ROOT_PASSWORD: root
+                ports:
+                  - 33060:3306
                 options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
             env:
               DB_TYPE: mariadb
-              DB_HOST: db
-              DB_PORT: 3306
+              DB_HOST: localhost
+              DB_PORT: 33060
               DB_USER: user
               DB_PASS: password
               DB_NAME: bookmarks
