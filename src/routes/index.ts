@@ -17,8 +17,8 @@ const routesBuilder: FastifyPluginAsync<never> = async function (fastify) {
   buildTagRoutes(fastify);
   buildListRoutes(fastify);
 
-  fastify.get('/api/ping', function (req, reply) {
-    reply.code(200).send('Pong');
+  fastify.get('/api/ping', function (_req, reply) {
+    reply.code(200).send('pong');
   });
 
   fastify.all('/api/*', function (req, _reply) {
