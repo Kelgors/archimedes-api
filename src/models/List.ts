@@ -1,10 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { Bookmark } from './Bookmark';
 import { ListPermission } from './ListPermission';
 import { ListVisibility } from './ListVisibility';
 import { User } from './User';
 
 @Entity()
+@Unique(['name', 'ownerId'])
 export class List {
   @PrimaryGeneratedColumn('uuid')
   id: string;

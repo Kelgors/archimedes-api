@@ -7,7 +7,7 @@ const VISIBILITY = z.nativeEnum(Visibility);
 
 export const LIST_ID = z.string().uuid();
 const LIST_NAME = z.string().min(1).max(32);
-const LIST_DESCRIPTION = z.string().nullable().optional();
+const LIST_DESCRIPTION = z.string().nullable();
 const LIST_VISIBILITY = z.object({
   anonymous: VISIBILITY,
   instance: VISIBILITY,
@@ -15,8 +15,8 @@ const LIST_VISIBILITY = z.object({
 
 export const ListCreateInputBodySchema = z.object({
   name: LIST_NAME,
-  description: LIST_DESCRIPTION,
-  visibility: LIST_VISIBILITY,
+  description: LIST_DESCRIPTION.optional(),
+  visibility: LIST_VISIBILITY.partial().optional(),
   ownerId: USER_ID.optional(),
 });
 

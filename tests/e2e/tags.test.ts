@@ -5,7 +5,7 @@ import request from 'supertest';
 import type { TagOutput } from '../../src/schemas/Tag';
 import { createServer } from '../../src/server';
 import errorMessages from '../../src/utils/error-messages';
-import { expectError, signIn } from '../lib';
+import { expectError, signAdmin, signSimpleUser } from '../lib';
 
 describe('/api/tags', function () {
   let fastify: FastifyInstance | undefined;
@@ -15,9 +15,8 @@ describe('/api/tags', function () {
   beforeAll(async function () {
     fastify = await createServer();
     app = fastify.server;
-    const [adminToken, userToken] = await signIn(app);
-    ADMIN_TOKEN = adminToken;
-    USER_TOKEN = userToken;
+    ADMIN_TOKEN = await signAdmin(app);
+    USER_TOKEN = await signSimpleUser(app);
   });
   afterAll(() => fastify?.close());
 

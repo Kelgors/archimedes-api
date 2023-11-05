@@ -9,12 +9,24 @@ import { getErrorCode } from '../utils/error-utils';
 
 declare module 'fastify' {
   interface FastifyInstance {
+    /**
+     * Authenticate through the Authorization header.
+     * Anonymous connections will be rejected.
+     * Provide {@link FastifyRequest.token} property.
+     * You must not use {@link FastifyRequest.tokenOpt}.
+     */
     authenticate: AppPreHandlerAsyncHookHandler;
+    /**
+     * Authenticate through the Authorization header.
+     * Anonymous connection will be accepted.
+     * Provide {@link FastifyRequest.tokenOpt} property.
+     * You should not use {@link FastifyRequest.token}.
+     */
     tryAuthenticate: AppPreHandlerAsyncHookHandler;
   }
   interface FastifyRequest {
     token: AccessToken;
-    tryToken: AccessToken | undefined;
+    tokenOpt: AccessToken | undefined;
   }
 }
 
@@ -31,7 +43,7 @@ const setupJwtTokenAuth: FastifyPluginAsync<never> = async function (fastify) {
   fastify.decorate('tryAuthenticate', async function (req, _reply) {
     try {
       await req.jwtVerify();
-      req.tryToken = await AccessTokenSchema.parseAsync(req.user);
+      req.tokenOpt = await AccessTokenSchema.parseAsync(req.user);
     } catch (err) {
       if (getErrorCode(err) !== 'FST_JWT_NO_AUTHORIZATION_IN_HEADER') {
         throw err;

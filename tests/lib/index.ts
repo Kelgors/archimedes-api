@@ -1,35 +1,29 @@
 import type { RawServerDefault } from 'fastify';
 import request from 'supertest';
 
-export function signIn(app: RawServerDefault): Promise<string[]> {
-  return Promise.all([
-    request(app)
-      .post('/api/auth/sign')
-      .send({
-        email: 'admin@test.me',
-        password: 'changemeplease',
-      })
-      .set('Accept', 'application/json')
-      .set('Content-Type', 'application/json')
-      .then(function (response) {
-        expect(response.body).toHaveProperty('accessToken');
-        expect(typeof response.body.accessToken).toBe('string');
-        return response.body.accessToken;
-      }),
-    request(app)
-      .post('/api/auth/sign')
-      .send({
-        email: 'user@test.me',
-        password: 'changemeplease',
-      })
-      .set('Accept', 'application/json')
-      .set('Content-Type', 'application/json')
-      .then(function (response) {
-        expect(response.body).toHaveProperty('accessToken');
-        expect(typeof response.body.accessToken).toBe('string');
-        return response.body.accessToken;
-      }),
-  ]);
+export function signIn(app: RawServerDefault, email: string, password: string) {
+  return request(app)
+    .post('/api/auth/sign')
+    .send({ email, password })
+    .set('Accept', 'application/json')
+    .set('Content-Type', 'application/json')
+    .then(function (response) {
+      expect(response.body).toHaveProperty('accessToken');
+      expect(typeof response.body.accessToken).toBe('string');
+      return response.body.accessToken;
+    });
+}
+
+export function signAdmin(app: RawServerDefault) {
+  return signIn(app, 'admin@test.me', 'changemeplease');
+}
+
+export function signSimpleUser(app: RawServerDefault) {
+  return signIn(app, 'user@test.me', 'changemeplease');
+}
+
+export function signNullUser(app: RawServerDefault) {
+  return signIn(app, 'null@test.me', 'changemeplease');
 }
 
 export function expectError(response: request.Response, status: number, message?: string) {

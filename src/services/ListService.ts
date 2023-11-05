@@ -11,21 +11,17 @@ class ListService implements ICrudService<List, ListCreateInputBody, ListUpdateI
     return getRepository(List).find({
       skip,
       take,
-      where: [{ visibility: { anonymous: Visibility.SHAREABLE } }, { visibility: { anonymous: Visibility.PUBLIC } }],
+      where: [{ visibility: { anonymous: Visibility.PUBLIC } }],
     });
   }
 
   findAllByUserId(userId: string, options?: FindAllOptions | undefined): Promise<List[]> {
-    const take = Math.min(options?.perPage || 20, 50);
+    const take = Math.min(options?.perPage || 20, 100);
     const skip = ((options?.page || 1) - 1) * take;
     return getRepository(List).find({
       skip,
       take,
-      where: [
-        { ownerId: userId },
-        { permissions: { userId }, visibility: { instance: Visibility.SHAREABLE } },
-        { permissions: { userId }, visibility: { instance: Visibility.PUBLIC } },
-      ],
+      where: [{ ownerId: userId }, { visibility: { instance: Visibility.PUBLIC } }],
     });
   }
 
@@ -33,9 +29,9 @@ class ListService implements ICrudService<List, ListCreateInputBody, ListUpdateI
     return getRepository(List).findOneOrFail({
       where: [
         { id, ownerId: userId },
-        { id, permissions: { userId }, visibility: { instance: Visibility.SHAREABLE } },
-        { id, permissions: { userId }, visibility: { instance: Visibility.PUBLIC } },
-        { id, visibility: { anonymous: Visibility.SHAREABLE } },
+        { id, permissions: { userId }, visibility: { instance: Visibility.SHARED } },
+        { id, visibility: { instance: Visibility.PUBLIC } },
+        { id, visibility: { anonymous: Visibility.SHARED } },
         { id, visibility: { anonymous: Visibility.PUBLIC } },
       ],
     });
@@ -44,7 +40,7 @@ class ListService implements ICrudService<List, ListCreateInputBody, ListUpdateI
   findOne(id: string): Promise<List> {
     return getRepository(List).findOneOrFail({
       where: [
-        { id, visibility: { anonymous: Visibility.SHAREABLE } },
+        { id, visibility: { anonymous: Visibility.SHARED } },
         { id, visibility: { anonymous: Visibility.PUBLIC } },
       ],
     });

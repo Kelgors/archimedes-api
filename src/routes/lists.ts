@@ -11,10 +11,12 @@ import {
   ListOutputSchema,
   ListUpdateInputBodySchema,
 } from '../schemas/List';
+import { listPermissionService } from '../services/ListPermissionService';
 import { listService } from '../services/ListService';
+import { AppError, AppErrorCode } from '../utils/ApplicationError';
 import { HttpExceptionSchema } from '../utils/HttpException';
 
-const buildTagRoutes = function (fastify: FastifyInstance) {
+const buildListRoutes = function (fastify: FastifyInstance) {
   const fastifyZod = fastify.withTypeProvider<ZodTypeProvider>();
 
   fastifyZod.route({
@@ -40,8 +42,8 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
         page: Number(req.query?.page) || 1,
         perPage: Number(req.query?.perPage),
       };
-      if (req.tryToken) {
-        dbLists = await listService.findAllByUserId(req.tryToken?.sub, paginateOptions);
+      if (req.tokenOpt) {
+        dbLists = await listService.findAllByUserId(req.tokenOpt.sub, paginateOptions);
       } else {
         dbLists = await listService.findAll(paginateOptions);
       }
@@ -70,8 +72,8 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
     },
     handler: async function (req, reply) {
       let dbList;
-      if (req.tryToken) {
-        dbList = await listService.findOneWithUserId(req.params.id, req.tryToken.sub);
+      if (req.tokenOpt) {
+        dbList = await listService.findOneWithUserId(req.params.id, req.tokenOpt.sub);
       } else {
         dbList = await listService.findOne(req.params.id);
       }
@@ -95,7 +97,10 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
       },
     },
     handler: async function (req, reply) {
-      const dbList = await listService.create(req.body);
+      const dbList = await listService.create({
+        ...req.body,
+        ownerId: req.token.sub,
+      });
       return reply.code(201).send({ data: dbList });
     },
   });
@@ -119,6 +124,9 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
       },
     },
     handler: async function (req, reply) {
+      const hasWritePermission = await listPermissionService.hasWritePermission(req.params.id, req.token.sub);
+      if (!hasWritePermission) throw new AppError(AppErrorCode.LIST_MISS_WRITE_PERM);
+
       const dbList = await listService.findOneWithUserId(req.params.id, req.token.sub);
       const dbUpdatedList = await listService.update(dbList, req.body);
       return reply.code(200).send({ data: dbUpdatedList });
@@ -144,10 +152,12 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
     },
     handler: async function (req, reply) {
       const dbList = await listService.findOneWithUserId(req.params.id, req.token.sub);
+      if (dbList.ownerId !== req.token.sub) throw new AppError(AppErrorCode.LIST_MUST_BE_OWNER);
+
       const deletedList = await listService.delete(dbList);
       return reply.code(200).send({ data: deletedList });
     },
   });
 };
 
-export default buildTagRoutes;
+export default buildListRoutes;
