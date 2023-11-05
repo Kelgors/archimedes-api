@@ -85,5 +85,5 @@ jobs:
           NODE_ENV: production
 
       - name: Test
-        run: npm test
+        run: npm run build:test
         env: ${{ matrix.db.env }}

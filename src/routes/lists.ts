@@ -2,8 +2,6 @@ import type { FastifyInstance } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import type { List } from '../models/List';
-import { UserRole } from '../models/User';
-import { hasRoles } from '../plugins/has-roles';
 import {
   DeleteListOutputSchema,
   LIST_ID,
@@ -108,7 +106,7 @@ const buildListRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'PATCH',
     url: '/api/lists/:id',
-    preHandler: [fastify.authenticate, hasRoles(UserRole.ADMIN)],
+    preHandler: [fastify.authenticate],
     schema: {
       params: z.object({
         id: LIST_ID,
@@ -124,10 +122,10 @@ const buildListRoutes = function (fastify: FastifyInstance) {
       },
     },
     handler: async function (req, reply) {
-      const hasWritePermission = await listPermissionService.hasWritePermission(req.params.id, req.token.sub);
+      const dbList = await listService.findOneWithUserId(req.params.id, req.token.sub);
+      const hasWritePermission = await listPermissionService.hasWritePermission(dbList, req.token.sub);
       if (!hasWritePermission) throw new AppError(AppErrorCode.LIST_MISS_WRITE_PERM);
 
-      const dbList = await listService.findOneWithUserId(req.params.id, req.token.sub);
       const dbUpdatedList = await listService.update(dbList, req.body);
       return reply.code(200).send({ data: dbUpdatedList });
     },
@@ -136,7 +134,7 @@ const buildListRoutes = function (fastify: FastifyInstance) {
   fastifyZod.route({
     method: 'DELETE',
     url: '/api/lists/:id',
-    preHandler: [fastify.authenticate, hasRoles(UserRole.ADMIN)],
+    preHandler: [fastify.authenticate],
     schema: {
       params: z.object({
         id: LIST_ID,

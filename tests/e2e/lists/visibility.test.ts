@@ -21,15 +21,12 @@ describe('/api/lists', function () {
   let OWNER_TOKEN = '';
   let READ_TOKEN = '';
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let WRITE_TOKEN = '';
   beforeAll(async function () {
     fastify = await createServer();
     app = fastify.server;
     NULL_TOKEN = await signNullUser(app);
     OWNER_TOKEN = await signIn(app, 'list-visibility-owner@test.me', 'changemeplease');
     READ_TOKEN = await signIn(app, 'list-visibility-permitted-read-user@test.me', 'changemeplease');
-    WRITE_TOKEN = await signIn(app, 'list-visibility-permitted-write-user@test.me', 'changemeplease');
   });
   afterAll(() => fastify?.close());
 

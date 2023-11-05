@@ -158,75 +158,93 @@
     },
     {
       "listId": "4e7f6619-2bd8-4e1a-ae0b-a56428eb4006",
-      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70"
+      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70",
+      "writable": false
     },
     {
       "listId": "e2972c77-710e-4875-891d-1b73756f3fc5",
-      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70"
+      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70",
+      "writable": false
     },
     {
       "listId": "25895fa6-b1e4-4968-8ab1-f2b636dafc75",
-      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70"
+      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70",
+      "writable": false
     },
     {
       "listId": "e1ad14e6-f189-47d1-989a-34723b6dccb4",
-      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70"
+      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70",
+      "writable": false
     },
     {
       "listId": "82908b29-7f52-4065-8248-74320f356e29",
-      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70"
+      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70",
+      "writable": false
     },
     {
       "listId": "22b6d444-2dae-4f55-967d-1e5bdeb91116",
-      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70"
+      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70",
+      "writable": false
     },
     {
       "listId": "09c67eb5-2910-4753-9bc6-7d7ab337f54b",
-      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70"
+      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70",
+      "writable": false
     },
     {
       "listId": "30a022e2-ee4e-4e73-a9c0-3571027dafdb",
-      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70"
+      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70",
+      "writable": false
     },
     {
       "listId": "ae98b1e8-7f46-47b5-af0a-957dffc45ef4",
-      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70"
+      "userId": "9eb0916b-0022-458d-8dc3-9c63f0e48d70",
+      "writable": false
     },
     {
       "listId": "4e7f6619-2bd8-4e1a-ae0b-a56428eb4006",
-      "userId": "99e14c56-c147-4c47-8847-06376dd51d33"
+      "userId": "99e14c56-c147-4c47-8847-06376dd51d33",
+      "writable": true
     },
     {
       "listId": "e2972c77-710e-4875-891d-1b73756f3fc5",
-      "userId": "99e14c56-c147-4c47-8847-06376dd51d33"
+      "userId": "99e14c56-c147-4c47-8847-06376dd51d33",
+      "writable": true
     },
     {
       "listId": "25895fa6-b1e4-4968-8ab1-f2b636dafc75",
-      "userId": "99e14c56-c147-4c47-8847-06376dd51d33"
+      "userId": "99e14c56-c147-4c47-8847-06376dd51d33",
+      "writable": true
     },
     {
       "listId": "e1ad14e6-f189-47d1-989a-34723b6dccb4",
-      "userId": "99e14c56-c147-4c47-8847-06376dd51d33"
+      "userId": "99e14c56-c147-4c47-8847-06376dd51d33",
+      "writable": true
     },
     {
       "listId": "82908b29-7f52-4065-8248-74320f356e29",
-      "userId": "99e14c56-c147-4c47-8847-06376dd51d33"
+      "userId": "99e14c56-c147-4c47-8847-06376dd51d33",
+      "writable": true
     },
     {
       "listId": "22b6d444-2dae-4f55-967d-1e5bdeb91116",
-      "userId": "99e14c56-c147-4c47-8847-06376dd51d33"
+      "userId": "99e14c56-c147-4c47-8847-06376dd51d33",
+      "writable": true
     },
     {
       "listId": "09c67eb5-2910-4753-9bc6-7d7ab337f54b",
-      "userId": "99e14c56-c147-4c47-8847-06376dd51d33"
+      "userId": "99e14c56-c147-4c47-8847-06376dd51d33",
+      "writable": true
     },
     {
       "listId": "30a022e2-ee4e-4e73-a9c0-3571027dafdb",
-      "userId": "99e14c56-c147-4c47-8847-06376dd51d33"
+      "userId": "99e14c56-c147-4c47-8847-06376dd51d33",
+      "writable": true
     },
     {
       "listId": "ae98b1e8-7f46-47b5-af0a-957dffc45ef4",
-      "userId": "99e14c56-c147-4c47-8847-06376dd51d33"
+      "userId": "99e14c56-c147-4c47-8847-06376dd51d33",
+      "writable": true
     }
   ],
   "tags": [

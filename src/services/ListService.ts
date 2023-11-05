@@ -15,6 +15,9 @@ class ListService implements ICrudService<List, ListCreateInputBody, ListUpdateI
     });
   }
 
+  /**
+   * Find Lists by their ID with any read/write access for the given user ID
+   */
   findAllByUserId(userId: string, options?: FindAllOptions | undefined): Promise<List[]> {
     const take = Math.min(options?.perPage || 20, 100);
     const skip = ((options?.page || 1) - 1) * take;
@@ -25,6 +28,9 @@ class ListService implements ICrudService<List, ListCreateInputBody, ListUpdateI
     });
   }
 
+  /**
+   * Find one List by its ID with any read/write access for the given user ID
+   */
   findOneWithUserId(id: string, userId: string): Promise<List> {
     return getRepository(List).findOneOrFail({
       where: [

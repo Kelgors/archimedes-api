@@ -5,15 +5,10 @@ import type { User } from '../models/User';
 import type { AccessToken } from '../schemas/Auth';
 
 class ListPermissionService {
-  hasReadPermission(listId: List['id'], userId: AccessToken['sub'] | User['id']): Promise<boolean> {
+  async hasWritePermission(list: List, userId: AccessToken['sub'] | User['id']): Promise<boolean> {
+    if (list.ownerId === userId) return true;
     return getRepository(ListPermission).exist({
-      where: { userId, listId, isWritable: false },
-    });
-  }
-
-  hasWritePermission(listId: List['id'], userId: AccessToken['sub'] | User['id']): Promise<boolean> {
-    return getRepository(ListPermission).exist({
-      where: { userId, listId, isWritable: true },
+      where: { userId, listId: list.id, isWritable: true },
     });
   }
 }
