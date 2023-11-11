@@ -1,7 +1,7 @@
 import type { FastifyInstance, RawServerDefault } from 'fastify';
 import request from 'supertest';
 import { createServer } from '../../../src/server';
-import { expectError, signIn, signNullUser } from '../../lib';
+import { expectError, expectSuccessfulResponse, signIn, signNullUser } from '../../lib';
 import {
   listPrivatePrivate,
   listPrivatePublic,
@@ -35,11 +35,6 @@ describe('/api/lists', function () {
       let fetchRequest = request(app).get('/api/lists?page=1&perPage=50').set('Accept', 'application/json');
       if (token) fetchRequest = fetchRequest.set('Authorization', `Bearer ${token}`);
       return fetchRequest;
-    }
-    function expectSuccessfulResponse(response: request.Response): void {
-      expect(response.headers['content-type']).toMatch(/json/);
-      expect(response.status).toBe(200);
-      expect(response.body?.data).toBeInstanceOf(Array);
     }
 
     describe('instance(PRIVATE),anonymous(PRIVATE)', function () {
@@ -294,14 +289,6 @@ describe('/api/lists', function () {
         .set('Accept', 'application/json');
       if (token) fetchRequest = fetchRequest.set('Authorization', `Bearer ${token}`);
       return fetchRequest;
-    }
-    function expectSuccessfulResponse(response: request.Response): void {
-      expect(response.headers['content-type']).toMatch(/json/);
-      expect(response.status).toBe(200);
-      expect(response.body).toBeDefined();
-      expect(response.body).toHaveProperty('data');
-      expect(response.body.data).toBeDefined();
-      expect(response.body.data).toHaveProperty('id');
     }
 
     describe('instance(PRIVATE),anonymous(PRIVATE)', function () {

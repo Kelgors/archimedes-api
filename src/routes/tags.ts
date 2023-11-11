@@ -74,7 +74,7 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
     schema: {
       body: TagCreateInputBodySchema,
       response: {
-        200: z.object({
+        201: z.object({
           data: TagOutputSchema,
         }),
         404: z.object({

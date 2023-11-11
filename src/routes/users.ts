@@ -86,7 +86,7 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
     schema: {
       body: UserCreateInputBodySchema,
       response: {
-        200: z.object({
+        201: z.object({
           data: UserOutputSchema,
         }),
         404: z.object({

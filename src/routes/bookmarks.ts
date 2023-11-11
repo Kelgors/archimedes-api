@@ -1,8 +1,9 @@
 import type { FastifyInstance } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
-import { difference, differenceBy, xorBy } from 'lodash';
+import { difference, differenceBy, omit, xorBy } from 'lodash';
 import { z } from 'zod';
 import type { Bookmark } from '../models/Bookmark';
+import type { Tag } from '../models/Tag';
 import {
   BOOKMARK_ID,
   BookmarkCreateInputBodySchema,
@@ -13,6 +14,7 @@ import {
 import { bookmarkService } from '../services/BookmarkService';
 import { listPermissionService } from '../services/ListPermissionService';
 import { listService } from '../services/ListService';
+import { tagService } from '../services/TagService';
 import { AppError, AppErrorCode } from '../utils/ApplicationError';
 import { HttpExceptionSchema } from '../utils/HttpException';
 import { mapId } from '../utils/mapper';
@@ -85,7 +87,7 @@ const buildBookmarkRoutes = function (fastify: FastifyInstance) {
     schema: {
       body: BookmarkCreateInputBodySchema,
       response: {
-        200: z.object({
+        201: z.object({
           data: BookmarkOutputSchema,
         }),
         404: z.object({
@@ -103,8 +105,21 @@ const buildBookmarkRoutes = function (fastify: FastifyInstance) {
           listIds: difference(req.body.listIds, dbLists.map(mapId)),
         });
       }
+      let dbTags: Tag[] = [];
+      if (req.body.tagIds?.length) {
+        dbTags = await tagService.findAll({ ids: req.body.tagIds });
+      }
+      if (dbTags.length !== (req.body.tagIds?.length || 0)) {
+        throw new AppError(AppErrorCode.UNSUPPORTED_ERROR, 'Tags not found', {
+          tagIds: difference(req.body.tagIds, dbTags.map(mapId)),
+        });
+      }
 
-      const dbBookmark = await bookmarkService.create(req.body);
+      const dbBookmark = await bookmarkService.create({
+        ...omit(req.body, ['tagIds', 'listIds']),
+        lists: dbLists,
+        tags: dbTags,
+      });
       return reply.code(201).send({ data: dbBookmark });
     },
   });
@@ -133,7 +148,7 @@ const buildBookmarkRoutes = function (fastify: FastifyInstance) {
       // Check write permission on added/removed lists
       if (req.body.listIds) {
         const dbPrevLists = await dbBookmark.lists;
-        const dbNextLists = await listService.findAll({ ids: req.body.listIds });
+        const dbNextLists = await listService.findAll_unsafe({ ids: req.body.listIds });
         const modifiedLists = xorBy(dbNextLists, dbPrevLists, mapId);
 
         const isAllowed = await listPermissionService.hasWritePermissions(modifiedLists, req.token.sub);

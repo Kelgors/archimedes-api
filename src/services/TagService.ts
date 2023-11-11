@@ -1,16 +1,18 @@
 import slugify from 'slugify';
+import { In } from 'typeorm';
 import type { FindAllOptions, ICrudService } from '../@types/ICrudService';
 import { getRepository } from '../db';
 import { Tag } from '../models/Tag';
 import type { TagCreateInputBody, TagUpdateInputBody } from '../schemas/Tag';
 
 class TagService implements ICrudService<Tag, TagCreateInputBody, TagUpdateInputBody> {
-  findAll(options?: FindAllOptions | undefined): Promise<Tag[]> {
+  findAll(options?: FindAllOptions<{ ids?: string[] }> | undefined): Promise<Tag[]> {
     const take = Math.min(options?.perPage || 20, 50);
     const skip = ((options?.page || 1) - 1) * take;
     return getRepository(Tag).find({
       skip,
       take,
+      where: { id: options?.ids ? In(options.ids) : undefined },
     });
   }
 

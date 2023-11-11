@@ -2,10 +2,17 @@ import { In } from 'typeorm';
 import type { FindAllOptions, ICrudService } from '../@types/ICrudService';
 import { getRepository } from '../db';
 import { Bookmark } from '../models/Bookmark';
+import type { List } from '../models/List';
 import { Visibility } from '../models/ListVisibility';
+import type { Tag } from '../models/Tag';
 import type { BookmarkCreateInputBody, BookmarkUpdateInputBody } from '../schemas/Bookmark';
 
-class BookmarkService implements ICrudService<Bookmark, BookmarkCreateInputBody, BookmarkUpdateInputBody> {
+type ServiceCreateInput = Omit<Omit<BookmarkCreateInputBody, 'listIds'>, 'tagIds'> & {
+  lists: List[];
+  tags?: Tag[];
+};
+
+class BookmarkService implements ICrudService<Bookmark, ServiceCreateInput, BookmarkUpdateInputBody> {
   findAll(_options?: FindAllOptions | undefined): Promise<Bookmark[]> {
     throw new Error('Method not implemented.');
   }
@@ -53,9 +60,9 @@ class BookmarkService implements ICrudService<Bookmark, BookmarkCreateInputBody,
     });
   }
 
-  create(input: BookmarkCreateInputBody): Promise<Bookmark> {
+  async create(input: ServiceCreateInput): Promise<Bookmark> {
     const repo = getRepository(Bookmark);
-    return repo.save(repo.create(input));
+    return repo.save(repo.create(input as unknown as Bookmark));
   }
 
   update(item: Bookmark, input: BookmarkUpdateInputBody): Promise<Bookmark> {

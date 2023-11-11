@@ -86,7 +86,7 @@ const buildListRoutes = function (fastify: FastifyInstance) {
     schema: {
       body: ListCreateInputBodySchema,
       response: {
-        200: z.object({
+        201: z.object({
           data: ListOutputSchema,
         }),
         404: z.object({

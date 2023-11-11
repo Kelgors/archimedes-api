@@ -15,7 +15,11 @@ type FilterableProperties = {
 type ListFindAllOptions = FindAllOptions<Omit<FilterableProperties, 'userId'>>;
 
 class ListService implements ICrudService<List, ListCreateInputBody, ListUpdateInputBody> {
-  findAll(options?: FindAllOptions<{ ids?: string[] }> | undefined): Promise<List[]> {
+  findAll(_options?: { page?: number | undefined; perPage?: number | undefined } | undefined): Promise<List[]> {
+    throw new Error('Method not implemented.');
+  }
+
+  findAll_unsafe(options?: FindAllOptions<{ ids?: string[] }> | undefined): Promise<List[]> {
     const take = Math.min(options?.perPage || 20, 50);
     const skip = ((options?.page || 1) - 1) * take;
     return getRepository(List).find({
@@ -93,9 +97,10 @@ class ListService implements ICrudService<List, ListCreateInputBody, ListUpdateI
     if (userId) {
       where.push({
         id,
-        permissions: { isWritable },
+        permissions: { userId, isWritable },
         visibility: { instance: Visibility.PUBLIC },
       });
+      // TODO remove that
       if (queryOneItem) {
         where.push({
           id,
@@ -110,8 +115,7 @@ class ListService implements ICrudService<List, ListCreateInputBody, ListUpdateI
     if ((userId && queryOneItem) || !userId) {
       where.push({
         id,
-        permissions: { isWritable },
-        visibility: { anonymous: queryOneItem ? In([Visibility.SHARED, Visibility.PUBLIC]) : Visibility.PUBLIC },
+        visibility: { anonymous: In([Visibility.SHARED, Visibility.PUBLIC]) },
       });
     }
 
