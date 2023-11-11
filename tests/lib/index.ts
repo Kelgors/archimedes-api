@@ -26,6 +26,14 @@ export function signNullUser(app: RawServerDefault) {
   return signIn(app, 'null@test.me', 'changemeplease');
 }
 
+export function expectSuccessfulResponse(response: request.Response, statusCode: number = 200): void {
+  expect(response.headers['content-type']).toMatch(/json/);
+  expect(response.status).toBe(statusCode);
+  expect(response.body).toBeDefined();
+  expect(response.body).toHaveProperty('data');
+  expect(response.body.data).toBeDefined();
+}
+
 export function expectError(response: request.Response, status: number, message?: string) {
   expect(response.headers['content-type']).toMatch(/json/);
   expect(response.status).toBe(status);

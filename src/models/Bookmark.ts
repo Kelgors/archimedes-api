@@ -1,4 +1,4 @@
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, RelationId } from 'typeorm';
 import { List } from './List';
 import { Tag } from './Tag';
 
@@ -26,10 +26,16 @@ export class Bookmark {
   @JoinTable()
   tags: Promise<Tag[]>;
 
+  @RelationId('tags')
+  tagIds: string[];
+
   @ManyToMany(() => List, (list) => list.bookmarks, {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
   @JoinTable()
   lists: Promise<List[]>;
+
+  @RelationId('lists')
+  listIds: string[];
 }

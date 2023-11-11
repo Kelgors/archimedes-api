@@ -1,7 +1,7 @@
 import type { FastifyInstance, RawServerDefault } from 'fastify';
 import request from 'supertest';
 import { createServer } from '../../../src/server';
-import { expectError, signIn, signNullUser } from '../../lib';
+import { expectError, expectSuccessfulResponse, signIn, signNullUser } from '../../lib';
 import {
   listPrivatePrivate,
   listPrivatePublic,
@@ -36,11 +36,6 @@ describe('/api/lists', function () {
       if (token) fetchRequest = fetchRequest.set('Authorization', `Bearer ${token}`);
       return fetchRequest;
     }
-    function expectSuccessfulResponse(response: request.Response): void {
-      expect(response.headers['content-type']).toMatch(/json/);
-      expect(response.status).toBe(200);
-      expect(response.body?.data).toBeInstanceOf(Array);
-    }
 
     describe('instance(PRIVATE),anonymous(PRIVATE)', function () {
       const dbList = listPrivatePrivate();
@@ -56,7 +51,7 @@ describe('/api/lists', function () {
         expect(response.body.data).not.toContainEqual(dbList);
       });
 
-      it('should not be available to permitted user', async function () {
+      it('should not be available to user with read permission', async function () {
         const response = await fetchLists(READ_TOKEN);
         expectSuccessfulResponse(response);
         expect(response.body.data).not.toContainEqual(dbList);
@@ -83,7 +78,7 @@ describe('/api/lists', function () {
         expect(response.body.data).not.toContainEqual(dbList);
       });
 
-      it('should not be available to permitted user', async function () {
+      it('should not be available to user with read permission', async function () {
         const response = await fetchLists(READ_TOKEN);
         expectSuccessfulResponse(response);
         expect(response.body.data).not.toContainEqual(dbList);
@@ -110,7 +105,7 @@ describe('/api/lists', function () {
         expect(response.body.data).not.toContainEqual(dbList);
       });
 
-      it('should not be available to permitted user', async function () {
+      it('should not be available to user with read permission', async function () {
         const response = await fetchLists(READ_TOKEN);
         expectSuccessfulResponse(response);
         expect(response.body.data).not.toContainEqual(dbList);
@@ -137,7 +132,7 @@ describe('/api/lists', function () {
         expect(response.body.data).not.toContainEqual(dbList);
       });
 
-      it('should not be available to permitted user', async function () {
+      it('should not be available to user with read permission', async function () {
         const response = await fetchLists(READ_TOKEN);
         expectSuccessfulResponse(response);
         expect(response.body.data).not.toContainEqual(dbList);
@@ -164,7 +159,7 @@ describe('/api/lists', function () {
         expect(response.body.data).not.toContainEqual(dbList);
       });
 
-      it('should not be available to permitted user', async function () {
+      it('should not be available to user with read permission', async function () {
         const response = await fetchLists(READ_TOKEN);
         expectSuccessfulResponse(response);
         expect(response.body.data).not.toContainEqual(dbList);
@@ -191,7 +186,7 @@ describe('/api/lists', function () {
         expect(response.body.data).not.toContainEqual(dbList);
       });
 
-      it('should not be available to permitted user', async function () {
+      it('should not be available to user with read permission', async function () {
         const response = await fetchLists(READ_TOKEN);
         expectSuccessfulResponse(response);
         expect(response.body.data).not.toContainEqual(dbList);
@@ -295,14 +290,6 @@ describe('/api/lists', function () {
       if (token) fetchRequest = fetchRequest.set('Authorization', `Bearer ${token}`);
       return fetchRequest;
     }
-    function expectSuccessfulResponse(response: request.Response): void {
-      expect(response.headers['content-type']).toMatch(/json/);
-      expect(response.status).toBe(200);
-      expect(response.body).toBeDefined();
-      expect(response.body).toHaveProperty('data');
-      expect(response.body.data).toBeDefined();
-      expect(response.body.data).toHaveProperty('id');
-    }
 
     describe('instance(PRIVATE),anonymous(PRIVATE)', function () {
       const dbList = listPrivatePrivate();
@@ -316,7 +303,7 @@ describe('/api/lists', function () {
         expectError(response, NO_VISIBILITY_ERR_STATUS_CODE);
       });
 
-      it('should not be available to permitted user', async function () {
+      it('should not be available to user with read permission', async function () {
         const response = await fetchList(dbList.id, READ_TOKEN);
         expectError(response, NO_VISIBILITY_ERR_STATUS_CODE);
       });
@@ -369,7 +356,7 @@ describe('/api/lists', function () {
         expect(response.body.data).toEqual(dbList);
       });
 
-      it('should not be available to permitted user', async function () {
+      it('should not be available to user with read permission', async function () {
         const response = await fetchList(dbList.id, READ_TOKEN);
         expectSuccessfulResponse(response);
         expect(response.body.data).toEqual(dbList);

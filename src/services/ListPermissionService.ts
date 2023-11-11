@@ -1,3 +1,4 @@
+import { In } from 'typeorm';
 import { getRepository } from '../db';
 import type { List } from '../models/List';
 import { ListPermission } from '../models/ListPermission';
@@ -9,6 +10,12 @@ class ListPermissionService {
     if (list.ownerId === userId) return true;
     return getRepository(ListPermission).exist({
       where: { userId, listId: list.id, isWritable: true },
+    });
+  }
+
+  async hasWritePermissions(lists: List[], userId: AccessToken['sub'] | User['id']): Promise<boolean> {
+    return getRepository(ListPermission).exist({
+      where: { userId, listId: In(lists.map(({ id }) => id)), isWritable: true },
     });
   }
 }

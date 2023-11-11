@@ -21,6 +21,12 @@
       "name": "Tech",
       "description": "All tech packages, frameworks, techniques, ...",
       "ownerId": "83efc0cc-5655-40a7-b1de-f3a39f95c440"
+    },
+    {
+      "id": "ca9e83ae-5e4c-427d-9a76-c718c193584c",
+      "name": "Tech (User)",
+      "description": "All tech packages, frameworks, techniques, ...",
+      "ownerId": "7b98f3e9-a1a4-4793-bd0c-941aade24003"
     }
   ],
   "permissions": [
@@ -33,6 +39,11 @@
       "listId": "50258edb-9ad9-4b23-9214-1d9d109553cd",
       "userId": "7b98f3e9-a1a4-4793-bd0c-941aade24003",
       "writable": false
+    },
+    {
+      "listId": "ca9e83ae-5e4c-427d-9a76-c718c193584c",
+      "userId": "7b98f3e9-a1a4-4793-bd0c-941aade24003",
+      "writable": true
     }
   ],
   "tags": [

@@ -5,7 +5,7 @@ import { Visibility } from '../../../src/models/ListVisibility';
 import type { ListCreateInputBody, ListOutput, ListUpdateInputBody } from '../../../src/schemas/List';
 import { createServer } from '../../../src/server';
 import errorMessages from '../../../src/utils/error-messages';
-import { expectError, signAdmin, signNullUser, signSimpleUser } from '../../lib';
+import { expectError, expectSuccessfulResponse, signAdmin, signNullUser, signSimpleUser } from '../../lib';
 
 describe('/api/lists', function () {
   let fastify: FastifyInstance | undefined;
@@ -29,13 +29,6 @@ describe('/api/lists', function () {
   });
   afterAll(() => fastify?.close());
 
-  function expectSuccessfulResponse(response: request.Response, statusCode: number = 200): void {
-    expect(response.headers['content-type']).toMatch(/json/);
-    expect(response.status).toBe(statusCode);
-    expect(response.body).toBeDefined();
-    expect(response.body).toHaveProperty('data');
-    expect(response.body.data).toBeDefined();
-  }
   function expectList(body: ListOutput, list: Partial<ListOutput>) {
     for (const key in list) {
       expect(body[key as keyof ListOutput]).toEqual(list[key as keyof ListOutput]);
@@ -59,6 +52,7 @@ describe('/api/lists', function () {
     if (token) fetchRequest = fetchRequest.set('Authorization', `Bearer ${token}`);
     return fetchRequest;
   }
+
   function deleteList(id: string, token?: string): request.Test {
     let fetchRequest = request(app).delete(`/api/lists/${id}`).set('Accept', 'application/json');
     if (token) fetchRequest = fetchRequest.set('Authorization', `Bearer ${token}`);

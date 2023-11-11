@@ -22,6 +22,7 @@ export const DB_USER = process.env.DB_USER || '';
 export const DB_PASS = process.env.DB_PASS || '';
 export const DB_NAME = process.env.DB_NAME || '';
 export const DB_SYNC = process.env.DB_SYNC === 'true';
+export const DB_RELATION_LIMIT = 50;
 
 export const LOG_TARGET = process.env.LOG_TARGET || '';
 export const LOG_PATH = process.env.LOG_PATH || null;

@@ -14,9 +14,10 @@ const buildAuthRoutes = function (fastify: FastifyInstance) {
     schema: {
       body: AuthSignInputBodySchema,
       response: {
-        200: {
-          token: z.string(),
-        },
+        201: z.object({
+          accessToken: z.string(),
+          refreshToken: z.string(),
+        }),
       },
     },
     handler: async function (req, reply) {
@@ -39,9 +40,9 @@ const buildAuthRoutes = function (fastify: FastifyInstance) {
     schema: {
       body: AuthRefreshInputBodySchema,
       response: {
-        200: {
-          token: z.string(),
-        },
+        201: z.object({
+          accessToken: z.string(),
+        }),
       },
     },
     handler: async function (req, reply) {
