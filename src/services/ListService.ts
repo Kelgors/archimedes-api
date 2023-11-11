@@ -1,30 +1,51 @@
+import type { FindOperator } from 'typeorm';
+import { Equal, In, type FindOptionsWhere } from 'typeorm';
 import type { FindAllOptions, ICrudService } from '../@types/ICrudService';
 import { getRepository } from '../db';
 import { List } from '../models/List';
 import { Visibility } from '../models/ListVisibility';
 import type { ListCreateInputBody, ListUpdateInputBody } from '../schemas/List';
 
+type FilterableProperties = {
+  userId?: string;
+  writeable?: boolean;
+  listIds?: string[];
+};
+
+type ListFindAllOptions = FindAllOptions<Omit<FilterableProperties, 'userId'>>;
+
 class ListService implements ICrudService<List, ListCreateInputBody, ListUpdateInputBody> {
-  findAll(options?: FindAllOptions | undefined): Promise<List[]> {
+  findAll(options?: FindAllOptions<{ ids?: string[] }> | undefined): Promise<List[]> {
     const take = Math.min(options?.perPage || 20, 50);
     const skip = ((options?.page || 1) - 1) * take;
     return getRepository(List).find({
       skip,
       take,
-      where: [{ visibility: { anonymous: Visibility.PUBLIC } }],
+      where: { id: options?.ids ? In(options.ids) : undefined },
+    });
+  }
+
+  findAllAnonymous(options?: ListFindAllOptions | undefined): Promise<List[]> {
+    const take = Math.min(options?.perPage || 20, 50);
+    const skip = ((options?.page || 1) - 1) * take;
+    return getRepository(List).find({
+      skip,
+      take,
+      where: this.buildWhereOptions(options),
     });
   }
 
   /**
    * Find Lists by their ID with any read/write access for the given user ID
    */
-  findAllByUserId(userId: string, options?: FindAllOptions | undefined): Promise<List[]> {
+  findAllByUserId(userId: string, options?: ListFindAllOptions | undefined): Promise<List[]> {
     const take = Math.min(options?.perPage || 20, 100);
     const skip = ((options?.page || 1) - 1) * take;
+
     return getRepository(List).find({
       skip,
       take,
-      where: [{ ownerId: userId }, { visibility: { instance: Visibility.PUBLIC } }],
+      where: this.buildWhereOptions({ userId, listIds: options?.listIds, writeable: options?.writeable }),
     });
   }
 
@@ -33,22 +54,18 @@ class ListService implements ICrudService<List, ListCreateInputBody, ListUpdateI
    */
   findOneWithUserId(id: string, userId: string): Promise<List> {
     return getRepository(List).findOneOrFail({
-      where: [
-        { id, ownerId: userId },
-        { id, permissions: { userId }, visibility: { instance: Visibility.SHARED } },
-        { id, visibility: { instance: Visibility.PUBLIC } },
-        { id, visibility: { anonymous: Visibility.SHARED } },
-        { id, visibility: { anonymous: Visibility.PUBLIC } },
-      ],
+      where: this.buildWhereOptions({
+        userId,
+        listIds: [id],
+      }),
     });
   }
 
   findOne(id: string): Promise<List> {
     return getRepository(List).findOneOrFail({
-      where: [
-        { id, visibility: { anonymous: Visibility.SHARED } },
-        { id, visibility: { anonymous: Visibility.PUBLIC } },
-      ],
+      where: this.buildWhereOptions({
+        listIds: [id],
+      }),
     });
   }
 
@@ -63,6 +80,42 @@ class ListService implements ICrudService<List, ListCreateInputBody, ListUpdateI
 
   delete(item: List): Promise<List> {
     return getRepository(List).remove(item);
+  }
+
+  private buildWhereOptions(options?: FilterableProperties): FindOptionsWhere<List> | FindOptionsWhere<List>[] {
+    const where: FindOptionsWhere<List>[] = [];
+    const id: FindOperator<string> | undefined = options?.listIds?.length ? In(options.listIds) : undefined;
+    const isWritable: FindOperator<boolean> | undefined =
+      typeof options?.writeable === 'boolean' ? Equal(options.writeable) : undefined;
+    const queryOneItem = options?.listIds?.length === 1 || false;
+
+    const userId = options?.userId;
+    if (userId) {
+      where.push({
+        id,
+        permissions: { isWritable },
+        visibility: { instance: Visibility.PUBLIC },
+      });
+      if (queryOneItem) {
+        where.push({
+          id,
+          permissions: { userId, isWritable },
+          visibility: { instance: Visibility.SHARED },
+        });
+      }
+      if (typeof options.writeable !== 'boolean' || options.writeable) {
+        where.push({ id, ownerId: userId });
+      }
+    }
+    if ((userId && queryOneItem) || !userId) {
+      where.push({
+        id,
+        permissions: { isWritable },
+        visibility: { anonymous: queryOneItem ? In([Visibility.SHARED, Visibility.PUBLIC]) : Visibility.PUBLIC },
+      });
+    }
+
+    return where;
   }
 }
 

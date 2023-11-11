@@ -1,9 +1,9 @@
 import type { ObjectLiteral } from 'typeorm';
 
-export type FindAllOptions = {
+export type FindAllOptions<AddOn = unknown> = {
   page?: number;
   perPage?: number;
-};
+} & AddOn;
 
 export interface ICrudService<Model extends ObjectLiteral, ZodCreateInput, ZodUpdateInput> {
   findAll(options?: FindAllOptions): Promise<Model[]>;

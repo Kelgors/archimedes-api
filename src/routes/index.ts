@@ -7,6 +7,7 @@ import { HttpException } from '../utils/HttpException';
 import errorMessagesMap from '../utils/error-messages';
 import { getErrorCode } from '../utils/error-utils';
 import buildAuthRoutes from './auth';
+import buildBookmarkRoutes from './bookmarks';
 import buildListRoutes from './lists';
 import buildTagRoutes from './tags';
 import buildUserRoutes from './users';
@@ -16,6 +17,7 @@ const routesBuilder: FastifyPluginAsync<never> = async function (fastify) {
   buildUserRoutes(fastify);
   buildTagRoutes(fastify);
   buildListRoutes(fastify);
+  buildBookmarkRoutes(fastify);
 
   fastify.get('/api/ping', function (_req, reply) {
     reply.code(200).send('pong');

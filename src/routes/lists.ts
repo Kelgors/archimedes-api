@@ -43,7 +43,7 @@ const buildListRoutes = function (fastify: FastifyInstance) {
       if (req.tokenOpt) {
         dbLists = await listService.findAllByUserId(req.tokenOpt.sub, paginateOptions);
       } else {
-        dbLists = await listService.findAll(paginateOptions);
+        dbLists = await listService.findAllAnonymous(paginateOptions);
       }
       return reply.code(200).send({
         data: dbLists,

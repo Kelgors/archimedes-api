@@ -56,7 +56,7 @@ describe('/api/lists', function () {
         expect(response.body.data).not.toContainEqual(dbList);
       });
 
-      it('should not be available to permitted user', async function () {
+      it('should not be available to user with read permission', async function () {
         const response = await fetchLists(READ_TOKEN);
         expectSuccessfulResponse(response);
         expect(response.body.data).not.toContainEqual(dbList);
@@ -83,7 +83,7 @@ describe('/api/lists', function () {
         expect(response.body.data).not.toContainEqual(dbList);
       });
 
-      it('should not be available to permitted user', async function () {
+      it('should not be available to user with read permission', async function () {
         const response = await fetchLists(READ_TOKEN);
         expectSuccessfulResponse(response);
         expect(response.body.data).not.toContainEqual(dbList);
@@ -110,7 +110,7 @@ describe('/api/lists', function () {
         expect(response.body.data).not.toContainEqual(dbList);
       });
 
-      it('should not be available to permitted user', async function () {
+      it('should not be available to user with read permission', async function () {
         const response = await fetchLists(READ_TOKEN);
         expectSuccessfulResponse(response);
         expect(response.body.data).not.toContainEqual(dbList);
@@ -137,7 +137,7 @@ describe('/api/lists', function () {
         expect(response.body.data).not.toContainEqual(dbList);
       });
 
-      it('should not be available to permitted user', async function () {
+      it('should not be available to user with read permission', async function () {
         const response = await fetchLists(READ_TOKEN);
         expectSuccessfulResponse(response);
         expect(response.body.data).not.toContainEqual(dbList);
@@ -164,7 +164,7 @@ describe('/api/lists', function () {
         expect(response.body.data).not.toContainEqual(dbList);
       });
 
-      it('should not be available to permitted user', async function () {
+      it('should not be available to user with read permission', async function () {
         const response = await fetchLists(READ_TOKEN);
         expectSuccessfulResponse(response);
         expect(response.body.data).not.toContainEqual(dbList);
@@ -191,7 +191,7 @@ describe('/api/lists', function () {
         expect(response.body.data).not.toContainEqual(dbList);
       });
 
-      it('should not be available to permitted user', async function () {
+      it('should not be available to user with read permission', async function () {
         const response = await fetchLists(READ_TOKEN);
         expectSuccessfulResponse(response);
         expect(response.body.data).not.toContainEqual(dbList);
@@ -316,7 +316,7 @@ describe('/api/lists', function () {
         expectError(response, NO_VISIBILITY_ERR_STATUS_CODE);
       });
 
-      it('should not be available to permitted user', async function () {
+      it('should not be available to user with read permission', async function () {
         const response = await fetchList(dbList.id, READ_TOKEN);
         expectError(response, NO_VISIBILITY_ERR_STATUS_CODE);
       });
@@ -369,7 +369,7 @@ describe('/api/lists', function () {
         expect(response.body.data).toEqual(dbList);
       });
 
-      it('should not be available to permitted user', async function () {
+      it('should not be available to user with read permission', async function () {
         const response = await fetchList(dbList.id, READ_TOKEN);
         expectSuccessfulResponse(response);
         expect(response.body.data).toEqual(dbList);

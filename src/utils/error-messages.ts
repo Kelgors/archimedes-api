@@ -14,8 +14,8 @@ export default {
   [AppErrorCode.WRONG_EMAIL_OR_PASSWORD]: () => new HttpException(404, 'User with email/password pair not found'),
   [AppErrorCode.MISSING_PERMISSIONS]: () => new HttpException(401, 'Not sufficient permissions'),
 
-  [AppErrorCode.LIST_MISS_WRITE_PERM]: () =>
-    new HttpException(403, 'You must have write permission to perform this action'),
+  [AppErrorCode.LIST_MISS_WRITE_PERM]: (error: AppError) =>
+    new HttpException(403, 'You must have write permission to perform this action', error.details),
   [AppErrorCode.LIST_MUST_BE_OWNER]: () => new HttpException(403, 'You must be the owner to perform this action'),
 
   [AppErrorCode.UNSUPPORTED_ERROR]: (error: AppError) => {
