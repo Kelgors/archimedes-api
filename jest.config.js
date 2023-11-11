@@ -5,5 +5,4 @@ module.exports = {
   testEnvironment: 'node',
   globalSetup: './scripts/jestGlobalSetup.ts',
   verbose: true,
-  testPathIgnorePatterns: ['dist/'],
 };

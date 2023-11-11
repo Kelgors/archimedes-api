@@ -5,10 +5,16 @@ import { z } from 'zod';
 import type { User } from '../models/User';
 import { UserRole } from '../models/User';
 import { hasRoles } from '../plugins/has-roles';
-import { USER_ID, UserCreateInputBodySchema, UserOutputSchema, UserUpdateInputBodySchema } from '../schemas/User';
+import {
+  DeleteUserOutputSchema,
+  USER_ID,
+  UserCreateInputBodySchema,
+  UserOutputSchema,
+  UserUpdateInputBodySchema,
+} from '../schemas/User';
 import { userService } from '../services/UserService';
 import { AppError, AppErrorCode } from '../utils/ApplicationError';
-import { HttpException, HttpExceptionSchema } from '../utils/HttpException';
+import { HttpExceptionSchema } from '../utils/HttpException';
 
 function renderUser(user: User) {
   return omit(user, ['encryptedPassword']);
@@ -113,8 +119,9 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
       },
     },
     handler: async function (req, reply) {
-      const dbUser = await userService.update(req.params.id, req.body);
-      return reply.code(200).send({ data: renderUser(dbUser) });
+      const dbUser = await userService.findOne(req.params.id);
+      const dbUpdatedUser = await userService.update(dbUser, req.body);
+      return reply.code(200).send({ data: renderUser(dbUpdatedUser) });
     },
   });
 
@@ -127,18 +134,18 @@ const buildUserRoutes = function (fastify: FastifyInstance) {
         id: USER_ID,
       }),
       response: {
-        200: z.object({}),
+        200: z.object({
+          data: DeleteUserOutputSchema,
+        }),
         404: z.object({
           error: HttpExceptionSchema,
         }),
       },
     },
     handler: async function (req, reply) {
-      const isDeleted = await userService.delete(req.params.id);
-      if (!isDeleted) {
-        throw new HttpException(404, 'Not found');
-      }
-      return reply.code(200).send({});
+      const dbUser = await userService.findOne(req.params.id);
+      const deletedUser = await userService.delete(dbUser);
+      return reply.code(200).send({ data: deletedUser });
     },
   });
 };

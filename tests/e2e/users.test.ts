@@ -1,10 +1,11 @@
 import type { FastifyInstance, RawServerDefault } from 'fastify';
+import { omit } from 'lodash';
 import request from 'supertest';
 import { UserRole } from '../../src/models/User';
 import type { UserOutput } from '../../src/schemas/User';
 import { createServer } from '../../src/server';
 import errorMessages from '../../src/utils/error-messages';
-import { expectError, signIn } from '../lib';
+import { expectError, signAdmin, signSimpleUser } from '../lib';
 
 describe('/api/users', function () {
   let fastify: FastifyInstance | undefined;
@@ -14,9 +15,8 @@ describe('/api/users', function () {
   beforeAll(async function () {
     fastify = await createServer();
     app = fastify.server;
-    const [adminToken, userToken] = await signIn(app);
-    ADMIN_TOKEN = adminToken;
-    USER_TOKEN = userToken;
+    ADMIN_TOKEN = await signAdmin(app);
+    USER_TOKEN = await signSimpleUser(app);
   });
   afterAll(() => fastify?.close());
 
@@ -754,8 +754,8 @@ describe('/api/users', function () {
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expect(deleteResponse.headers['content-type']).toMatch(/json/);
       expect(deleteResponse.status).toBe(200);
-      expect(typeof deleteResponse.body).toBe('object');
-      expect(Object.keys(deleteResponse.body)).toHaveLength(0);
+      expect(deleteResponse.body).toHaveProperty('data');
+      expect(deleteResponse.body.data).toEqual(omit(localUser, ['id']));
 
       const getResponse = await request(app)
         .get(`/api/users/${localUser?.id}`)

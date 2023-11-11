@@ -9,6 +9,6 @@ export interface ICrudService<Model extends ObjectLiteral, ZodCreateInput, ZodUp
   findAll(options?: FindAllOptions): Promise<Model[]>;
   findOne(id: Model['id']): Promise<Model>;
   create(input: ZodCreateInput): Promise<Model>;
-  update(id: Model['id'], input: ZodUpdateInput): Promise<Model>;
-  delete(id: Model['id']): Promise<boolean>;
+  update(item: Model, input: ZodUpdateInput): Promise<Model>;
+  delete(item: Model): Promise<Model>;
 }

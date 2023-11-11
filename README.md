@@ -1,4 +1,4 @@
-Self-hostable bookmark API
+Archimedes is a self-hostable bookmark management app
 
 ## Getting Started
 

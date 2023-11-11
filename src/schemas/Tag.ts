@@ -15,7 +15,9 @@ export const TagOutputSchema = z.object({
   id: TAG_ID,
   name: TAG_NAME,
 });
+export const DeleteTagOutputSchema = TagOutputSchema.merge(z.object({ id: TAG_ID.optional() }));
 
 export type TagOutput = z.infer<typeof TagOutputSchema>;
 export type TagCreateInputBody = z.infer<typeof TagCreateInputBodySchema>;
 export type TagUpdateInputBody = z.infer<typeof TagUpdateInputBodySchema>;
+export type DeleteTagOutput = z.infer<typeof DeleteTagOutputSchema>;

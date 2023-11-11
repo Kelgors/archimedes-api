@@ -3,9 +3,15 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { UserRole } from '../models/User';
 import { hasRoles } from '../plugins/has-roles';
-import { TAG_ID, TagCreateInputBodySchema, TagOutputSchema, TagUpdateInputBodySchema } from '../schemas/Tag';
+import {
+  DeleteTagOutputSchema,
+  TAG_ID,
+  TagCreateInputBodySchema,
+  TagOutputSchema,
+  TagUpdateInputBodySchema,
+} from '../schemas/Tag';
 import { tagService } from '../services/TagService';
-import { HttpException, HttpExceptionSchema } from '../utils/HttpException';
+import { HttpExceptionSchema } from '../utils/HttpException';
 
 const buildTagRoutes = function (fastify: FastifyInstance) {
   const fastifyZod = fastify.withTypeProvider<ZodTypeProvider>();
@@ -101,8 +107,9 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
       },
     },
     handler: async function (req, reply) {
-      const dbTag = await tagService.update(req.params.id, req.body);
-      return reply.code(200).send({ data: dbTag });
+      const dbTag = await tagService.findOne(req.params.id);
+      const dbUpdatedTag = await tagService.update(dbTag, req.body);
+      return reply.code(200).send({ data: dbUpdatedTag });
     },
   });
 
@@ -115,18 +122,18 @@ const buildTagRoutes = function (fastify: FastifyInstance) {
         id: TAG_ID,
       }),
       response: {
-        200: z.object({}),
+        200: z.object({
+          data: DeleteTagOutputSchema,
+        }),
         404: z.object({
           error: HttpExceptionSchema,
         }),
       },
     },
     handler: async function (req, reply) {
-      const isDeleted = await tagService.delete(req.params.id);
-      if (!isDeleted) {
-        throw new HttpException(404, 'Not found');
-      }
-      return reply.code(200).send({});
+      const dbTag = await tagService.findOne(req.params.id);
+      const deletedTag = await tagService.delete(dbTag);
+      return reply.code(200).send({ data: deletedTag });
     },
   });
 };

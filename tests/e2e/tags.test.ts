@@ -1,10 +1,11 @@
 import type { FastifyInstance, RawServerDefault } from 'fastify';
+import { omit } from 'lodash';
 import slugify from 'slugify';
 import request from 'supertest';
 import type { TagOutput } from '../../src/schemas/Tag';
 import { createServer } from '../../src/server';
 import errorMessages from '../../src/utils/error-messages';
-import { expectError, signIn } from '../lib';
+import { expectError, signAdmin, signSimpleUser } from '../lib';
 
 describe('/api/tags', function () {
   let fastify: FastifyInstance | undefined;
@@ -14,9 +15,8 @@ describe('/api/tags', function () {
   beforeAll(async function () {
     fastify = await createServer();
     app = fastify.server;
-    const [adminToken, userToken] = await signIn(app);
-    ADMIN_TOKEN = adminToken;
-    USER_TOKEN = userToken;
+    ADMIN_TOKEN = await signAdmin(app);
+    USER_TOKEN = await signSimpleUser(app);
   });
   afterAll(() => fastify?.close());
 
@@ -626,8 +626,8 @@ describe('/api/tags', function () {
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expect(deleteResponse.headers['content-type']).toMatch(/json/);
       expect(deleteResponse.status).toBe(200);
-      expect(typeof deleteResponse.body).toBe('object');
-      expect(Object.keys(deleteResponse.body)).toHaveLength(0);
+      expect(deleteResponse.body).toHaveProperty('data');
+      expect(deleteResponse.body.data).toEqual(omit(localTag, ['id']));
 
       const getResponse = await request(app)
         .get(`/api/tags/${localTag?.id}`)
@@ -638,14 +638,21 @@ describe('/api/tags', function () {
     });
 
     it('should delete the tag which is related to a bookmark', async () => {
+      const remoteTagResponse = await request(app)
+        .get(`/api/tags/d860d634-052a-4ad5-af43-7335d45e73ba`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
+      const remoteTag = remoteTagResponse.body.data;
+      expect(typeof remoteTag.id).toBe('string');
+      expect(typeof remoteTag.name).toBe('string');
+
       const deleteResponse = await request(app)
         .delete(`/api/tags/d860d634-052a-4ad5-af43-7335d45e73ba`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${ADMIN_TOKEN}`);
       expect(deleteResponse.headers['content-type']).toMatch(/json/);
       expect(deleteResponse.status).toBe(200);
-      expect(typeof deleteResponse.body).toBe('object');
-      expect(Object.keys(deleteResponse.body)).toHaveLength(0);
+      expect(deleteResponse.body.data).toEqual(omit(remoteTag, ['id']));
     });
   });
 });
